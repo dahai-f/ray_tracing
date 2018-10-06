@@ -14,7 +14,7 @@ fn main() {
     println!("P3\n{} {}\n255", nx, ny);
 
     let lower_left_corner = Vector3::new(-2.0, -1.0, -1.0);
-    let horizontal = Vector3::new(4.0, 2.0, 2.0);
+    let horizontal = Vector3::new(4.0, 0.0, 0.0);
     let vertical = Vector3::new(0.0, 2.0, 0.0);
     let origin = Vector3::new(0.0, 0.0, 0.0);
 
