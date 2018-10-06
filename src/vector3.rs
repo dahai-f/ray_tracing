@@ -1,7 +1,7 @@
-use std::ops::*;
 use std::fmt::Display;
 use std::fmt::Error;
 use std::fmt::Formatter;
+use std::ops::*;
 
 pub struct Vec3([f32; 3]);
 
