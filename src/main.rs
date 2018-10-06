@@ -1,12 +1,7 @@
 extern crate ray_tracing;
 
 use ray_tracing::*;
-
-fn calc_color_by_ray(r: &Ray) -> Color {
-    let unit_direction = r.direction().normalized();
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    &((1.0 - t) * &Color::new(1.0, 1.0, 1.0)) + &(t * &Color::new(0.5, 0.7, 1.0))
-}
+use ray_tracing::ray_hit;
 
 fn main() {
     let nx = 200;
@@ -30,4 +25,14 @@ fn main() {
             println!("{} {} {}", ir, ig, ib);
         }
     }
+}
+
+fn calc_color_by_ray(r: &Ray) -> Color {
+    if ray_hit::hit_sphere(&Vector3::new(0.0, 0.0, -1.0), 0.5, r) {
+        return Color::new(1.0, 0.0, 0.0);
+    }
+
+    let unit_direction = r.direction().normalized();
+    let t = 0.5 * (unit_direction.y() + 1.0);
+    &((1.0 - t) * &Color::new(1.0, 1.0, 1.0)) + &(t * &Color::new(0.5, 0.7, 1.0))
 }

@@ -5,3 +5,4 @@ pub use self::ray::Ray;
 mod vector3;
 mod color;
 mod ray;
+pub mod ray_hit;

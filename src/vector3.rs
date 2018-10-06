@@ -35,7 +35,7 @@ impl Vector3 {
     }
 
     pub fn dot(&self, other: &Vector3) -> f32 {
-        self.x() * other.y() + self.y() * other.y() + self.z() * other.z()
+        self.x() * other.x() + self.y() * other.y() + self.z() * other.z()
     }
 
     pub fn cross(&self, other: &Vector3) -> Vector3 {
