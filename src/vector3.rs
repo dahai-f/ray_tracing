@@ -11,9 +11,15 @@ impl Vector3 {
         Vector3([x, y, z])
     }
 
-    pub fn x(&self) -> f32 { self.0[0] }
-    pub fn y(&self) -> f32 { self.0[1] }
-    pub fn z(&self) -> f32 { self.0[2] }
+    pub fn x(&self) -> f32 {
+        self.0[0]
+    }
+    pub fn y(&self) -> f32 {
+        self.0[1]
+    }
+    pub fn z(&self) -> f32 {
+        self.0[2]
+    }
 
     pub fn length(&self) -> f32 {
         (self.x() * self.x() + self.y() * self.y() + self.z() * self.z()).sqrt()
@@ -39,9 +45,11 @@ impl Vector3 {
     }
 
     pub fn cross(&self, other: &Vector3) -> Vector3 {
-        Vector3::new(self.y() * other.z() - self.z() * other.y(),
-                     self.z() * other.x() - self.x() * other.z(),
-                     self.x() * other.y() - self.y() * other.x())
+        Vector3::new(
+            self.y() * other.z() - self.z() * other.y(),
+            self.z() * other.x() - self.x() * other.z(),
+            self.x() * other.y() - self.y() * other.x(),
+        )
     }
 }
 
@@ -114,6 +122,14 @@ impl MulAssign<f32> for Vector3 {
         self.0[0] *= rhs;
         self.0[1] *= rhs;
         self.0[2] *= rhs;
+    }
+}
+
+impl Mul<&Vector3> for f32 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: &Vector3) -> Vector3 {
+        rhs * self
     }
 }
 

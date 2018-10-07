@@ -12,7 +12,10 @@ pub trait Hittable {
     fn hit<'a>(&self, ray: &'a Ray, t_min: f32, t_max: f32, hit_record: &'a mut HitRecord) -> bool;
 }
 
-impl<T> Hittable for Vec<Box<T>> where T: Hittable {
+impl<T> Hittable for Vec<Box<T>>
+where
+    T: Hittable,
+{
     fn hit<'a>(&self, ray: &'a Ray, t_min: f32, t_max: f32, hit_record: &'a mut HitRecord) -> bool {
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
