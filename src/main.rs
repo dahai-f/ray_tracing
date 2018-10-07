@@ -1,7 +1,7 @@
 extern crate ray_tracing;
 
 use ray_tracing::*;
-use ray_tracing::ray_hit;
+use std::f32;
 
 fn main() {
     let nx = 200;
@@ -13,12 +13,17 @@ fn main() {
     let vertical = Vector3::new(0.0, 2.0, 0.0);
     let origin = Vector3::new(0.0, 0.0, 0.0);
 
+    let world = vec![
+        Box::new(Sphere::new(&Vector3::new(0.0, 0.0, -1.0), 0.5)),
+        Box::new(Sphere::new(&Vector3::new(0.0, -100.5, -1.0), 100.0))
+    ];
+
     for j in (0..ny).rev() {
         for i in 0..nx {
             let u = i as f32 / nx as f32;
             let v = j as f32 / ny as f32;
-            let r = Ray::new(&origin, &(lower_left_corner + &horizontal * u + &vertical * v));
-            let color = calc_color_by_ray(&r);
+            let r = Ray::new(&origin, &(lower_left_corner + &horizontal * u + &vertical * v).normalized());
+            let color = calc_color_by_ray(&r, &world);
             let ir = (255.99_f32 * color.r()) as i32;
             let ig = (255.99_f32 * color.g()) as i32;
             let ib = (255.99_f32 * color.b()) as i32;
@@ -27,12 +32,12 @@ fn main() {
     }
 }
 
-fn calc_color_by_ray(r: &Ray) -> Color {
-    if ray_hit::hit_sphere(&Vector3::new(0.0, 0.0, -1.0), 0.5, r) {
-        return Color::new(1.0, 0.0, 0.0);
+fn calc_color_by_ray<T: Hittable>(r: &Ray, hit_list: &Vec<Box<T>>) -> Color {
+    let mut hit_record = HitRecord::default();
+    if hit_list.hit(r, 0.0, f32::MAX, &mut hit_record) {
+        let n = &hit_record.normal;
+        return Color::new(0.5 * (n.x() + 1.0), 0.5 * (n.y() + 1.0), 0.5 * (n.y() + 1.0));
     }
-
-    let unit_direction = r.direction().normalized();
-    let t = 0.5 * (unit_direction.y() + 1.0);
+    let t = 0.5 * (r.direction().y() + 1.0);
     &((1.0 - t) * &Color::new(1.0, 1.0, 1.0)) + &(t * &Color::new(0.5, 0.7, 1.0))
 }
