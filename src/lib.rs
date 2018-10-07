@@ -1,3 +1,5 @@
+extern crate rand;
+
 pub use self::camera::Camera;
 pub use self::color::Color;
 pub use self::ray::Ray;

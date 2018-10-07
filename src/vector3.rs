@@ -1,3 +1,4 @@
+use rand::distributions::*;
 use std::fmt::Display;
 use std::fmt::Error;
 use std::fmt::Formatter;
@@ -182,5 +183,18 @@ impl IndexMut<usize> for Vector3 {
 impl Display for Vector3 {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "{} {} {}", self.x(), self.y(), self.z())
+    }
+}
+
+impl Distribution<Vector3> for Standard {
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Vector3 {
+        loop {
+            let result = &(2.0
+                * &Vector3::new(rng.gen::<f32>(), rng.gen::<f32>(), rng.gen::<f32>()))
+                - &Vector3::new(1.0, 1.0, 1.0);
+            if result.squared_length() < 1.0 {
+                return result;
+            }
+        }
     }
 }

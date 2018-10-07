@@ -3,7 +3,10 @@ extern crate ray_tracing;
 
 use rand::prelude::*;
 use ray_tracing::*;
+use std::cell::RefCell;
 use std::f32;
+
+thread_local!(static RNG: RefCell<ThreadRng> = RefCell::new(rand::thread_rng()));
 
 fn main() {
     let nx = 200;
@@ -18,18 +21,17 @@ fn main() {
 
     let camera = Camera::new();
 
-    let mut rng = rand::thread_rng();
-
     for j in (0..ny).rev() {
         for i in 0..nx {
             let mut color = Color::new(0.0, 0.0, 0.0);
             for _ in 0..ns {
-                let u = (i as f32 + rng.gen::<f32>()) / nx as f32;
-                let v = (j as f32 + rng.gen::<f32>()) / ny as f32;
+                let u = (i as f32 + RNG.with(|rng| rng.borrow_mut().gen::<f32>())) / nx as f32;
+                let v = (j as f32 + RNG.with(|rng| rng.borrow_mut().gen::<f32>())) / ny as f32;
                 let r = camera.get_ray(u, v);
                 color += &calc_color_by_ray(&r, &world);
             }
             color /= ns as f32;
+            color = Color::new(color.r().sqrt(), color.g().sqrt(), color.b().sqrt()); // square root to use gamma
             let ir = (255.99_f32 * color.r()) as i32;
             let ig = (255.99_f32 * color.g()) as i32;
             let ib = (255.99_f32 * color.b()) as i32;
@@ -40,12 +42,16 @@ fn main() {
 
 fn calc_color_by_ray<T: Hittable>(r: &Ray, hit_list: &Vec<Box<T>>) -> Color {
     let mut hit_record = HitRecord::default();
-    if hit_list.hit(r, 0.0, f32::MAX, &mut hit_record) {
-        let n = &hit_record.normal;
-        return Color::new(
-            0.5 * (n.x() + 1.0),
-            0.5 * (n.y() + 1.0),
-            0.5 * (n.y() + 1.0),
+    if hit_list.hit(r, 0.001, f32::MAX, &mut hit_record) {
+        // limit min to 0.001 to solve shadow acne problem
+        let target =
+            hit_record.position + hit_record.normal + RNG.with(|rng| rng.borrow_mut().gen());
+        return 0.5 * &calc_color_by_ray(
+            &Ray::new(
+                &hit_record.position,
+                &(&target - &hit_record.position).normalized(),
+            ),
+            hit_list,
         );
     }
     let t = 0.5 * (r.direction().y() + 1.0);
