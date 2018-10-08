@@ -3,10 +3,7 @@ extern crate ray_tracing;
 
 use rand::prelude::*;
 use ray_tracing::*;
-use std::cell::RefCell;
 use std::f32;
-
-thread_local!(static RNG: RefCell<ThreadRng> = RefCell::new(rand::thread_rng()));
 
 fn main() {
     let nx = 200;
