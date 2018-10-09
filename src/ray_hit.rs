@@ -5,18 +5,18 @@ pub struct HitRecord<'a> {
     pub t: f32,
     pub position: Vector3,
     pub normal: Vector3,
-    material: Option<&'a Material>,
+    pub material: Option<&'a Box<Material>>,
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, hit_record: &mut HitRecord) -> bool;
+    fn hit<'a, 'b: 'a>(&'b self, ray: &Ray, t_min: f32, t_max: f32, hit_record: &mut HitRecord<'a>) -> bool;
 }
 
-impl<T> Hittable for Vec<Box<T>>
-where
-    T: Hittable,
+impl<THittable> Hittable for Vec<Box<THittable>>
+    where
+        THittable: Hittable,
 {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, hit_record: &mut HitRecord) -> bool {
+    fn hit<'a, 'b: 'a>(&'b self, ray: &Ray, t_min: f32, t_max: f32, hit_record: &mut HitRecord<'a>) -> bool {
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
         for hit_ele in self {

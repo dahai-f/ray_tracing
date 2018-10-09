@@ -3,13 +3,15 @@ use crate::*;
 pub struct Sphere {
     center: Vector3,
     radius: f32,
+    material: Box<Material>,
 }
 
 impl Sphere {
-    pub fn new(center: &Vector3, radius: f32) -> Sphere {
+    pub fn new(center: &Vector3, radius: f32, material: Box<Material>) -> Sphere {
         Sphere {
             center: *center,
             radius,
+            material,
         }
     }
 
@@ -23,7 +25,13 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit<'a>(&self, ray: &Ray, t_min: f32, t_max: f32, hit_record: &'a mut HitRecord) -> bool {
+    fn hit<'a, 'b: 'a>(
+        &'b self,
+        ray: &Ray,
+        t_min: f32,
+        t_max: f32,
+        hit_record: &mut HitRecord<'a>,
+    ) -> bool {
         let co = ray.origin() - &self.center; // center to origin
         let a = ray.direction().dot(&ray.direction());
         let b = 2.0 * ray.direction().dot(&co);
@@ -35,6 +43,7 @@ impl Hittable for Sphere {
                 hit_record.t = t;
                 hit_record.position = ray.point_at(t);
                 hit_record.normal = &(&hit_record.position - &self.center) / self.radius;
+                hit_record.material = Some(&self.material);
                 return true;
             }
 
@@ -43,6 +52,7 @@ impl Hittable for Sphere {
                 hit_record.t = t;
                 hit_record.position = ray.point_at(t);
                 hit_record.normal = &(&hit_record.position - &self.center) / self.radius;
+                hit_record.material = Some(&self.material);
                 return true;
             }
         }

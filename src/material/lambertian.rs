@@ -1,17 +1,13 @@
 use crate::*;
 
-pub trait Material {
-    fn scatter(
-        &self,
-        ray_in: &Ray,
-        hit_record: &HitRecord,
-        attenuation: &mut Vector3,
-        scattered: &mut Ray,
-    ) -> bool;
-}
-
 pub struct Lambertian {
     albedo: Vector3,
+}
+
+impl Lambertian {
+    pub fn new(albedo: &Vector3) -> Lambertian {
+        Lambertian { albedo: *albedo }
+    }
 }
 
 impl Material for Lambertian {

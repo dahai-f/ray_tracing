@@ -21,6 +21,15 @@ impl Vector3 {
     pub fn z(&self) -> f32 {
         self.0[2]
     }
+    pub fn r(&self) -> f32 {
+        self.0[0]
+    }
+    pub fn g(&self) -> f32 {
+        self.0[1]
+    }
+    pub fn b(&self) -> f32 {
+        self.0[2]
+    }
 
     pub fn length(&self) -> f32 {
         (self.x() * self.x() + self.y() * self.y() + self.z() * self.z()).sqrt()
@@ -51,6 +60,10 @@ impl Vector3 {
             self.z() * other.x() - self.x() * other.z(),
             self.x() * other.y() - self.y() * other.x(),
         )
+    }
+
+    pub fn reflect(&self, normal: &Vector3) -> Vector3 {
+        self - &(normal * (self.dot(normal) * 2.0))
     }
 }
 

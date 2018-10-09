@@ -1,7 +1,6 @@
 extern crate rand;
 
 pub use self::camera::Camera;
-pub use self::color::Color;
 pub use self::material::Material;
 pub use self::ray::Ray;
 pub use self::ray_hit::{HitRecord, Hittable};
@@ -11,8 +10,7 @@ use rand::prelude::*;
 use std::cell::RefCell;
 
 mod camera;
-mod color;
-mod material;
+pub mod material;
 mod ray;
 pub mod ray_hit;
 mod sphere;
