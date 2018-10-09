@@ -25,12 +25,12 @@ fn main() {
         Box::new(Sphere::new(
             &Vector3::new(1.0, 0.0, -1.0),
             0.5,
-            Box::new(material::Metal::new(&Vector3::new(0.8, 0.6, 0.2))),
+            Box::new(material::Metal::new(&Vector3::new(0.8, 0.6, 0.2), 0.3)),
         )),
         Box::new(Sphere::new(
             &Vector3::new(-1.0, 0.0, -1.0),
             0.5,
-            Box::new(material::Metal::new(&Vector3::new(0.8, 0.8, 0.8))),
+            Box::new(material::Metal::new(&Vector3::new(0.8, 0.8, 0.8), 0.1)),
         )),
     ];
 
