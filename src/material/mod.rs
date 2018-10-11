@@ -1,3 +1,4 @@
+pub use self::dielectric::Dielectric;
 pub use self::lambertian::Lambertian;
 pub use self::metal::Metal;
 use crate::*;
@@ -12,5 +13,6 @@ pub trait Material {
     ) -> bool;
 }
 
+mod dielectric;
 mod lambertian;
 mod metal;

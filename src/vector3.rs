@@ -65,6 +65,16 @@ impl Vector3 {
     pub fn reflect(&self, normal: &Vector3) -> Vector3 {
         self - &(normal * (self.dot(normal) * 2.0))
     }
+
+    pub fn refract(&self, normal: &Vector3, ni_over_nt: f32) -> Option<Vector3> {
+        let dt = self.dot(normal);
+        let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
+        if discriminant > 0.0 {
+            Some(&(ni_over_nt * &(self - &(dt * normal))) - &(discriminant.sqrt() * normal))
+        } else {
+            None
+        }
+    }
 }
 
 impl Add for &Vector3 {
@@ -176,6 +186,14 @@ impl DivAssign<f32> for Vector3 {
         self.0[0] /= rhs;
         self.0[1] /= rhs;
         self.0[2] /= rhs;
+    }
+}
+
+impl Neg for &Vector3 {
+    type Output = Vector3;
+
+    fn neg(self) -> Vector3 {
+        Vector3::new(-self.x(), -self.y(), -self.z())
     }
 }
 

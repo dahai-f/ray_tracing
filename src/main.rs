@@ -15,7 +15,7 @@ fn main() {
         Box::new(Sphere::new(
             &Vector3::new(0.0, 0.0, -1.0),
             0.5,
-            Box::new(material::Lambertian::new(&Vector3::new(0.8, 0.3, 0.3))),
+            Box::new(material::Lambertian::new(&Vector3::new(0.1, 0.2, 0.5))),
         )),
         Box::new(Sphere::new(
             &Vector3::new(0.0, -100.5, -1.0),
@@ -30,7 +30,7 @@ fn main() {
         Box::new(Sphere::new(
             &Vector3::new(-1.0, 0.0, -1.0),
             0.5,
-            Box::new(material::Metal::new(&Vector3::new(0.8, 0.8, 0.8), 0.1)),
+            Box::new(material::Dielectric::new(1.5)),
         )),
     ];
 
@@ -56,12 +56,12 @@ fn main() {
 }
 
 fn calc_color_by_ray<T: Hittable>(r: &Ray, hit_list: &Vec<Box<T>>, depth: u32) -> Vector3 {
-    let mut hit_record = HitRecord::default();
     // limit min to 0.001 to solve shadow acne problem
+    let mut hit_record = HitRecord::default();
     if hit_list.hit(r, 0.001, f32::MAX, &mut hit_record) {
         let mut attenuation = Vector3::default();
         let mut scattered = Ray::default();
-        if depth < 50 && hit_record.material.as_ref().unwrap().scatter(
+        if depth < 50 && hit_record.material.unwrap().scatter(
             r,
             &hit_record,
             &mut attenuation,

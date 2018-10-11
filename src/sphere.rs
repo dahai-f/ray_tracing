@@ -37,25 +37,36 @@ impl Hittable for Sphere {
         let b = 2.0 * ray.direction().dot(&co);
         let c = co.dot(&co) - self.radius * self.radius;
         let discriminant = b * b - 4.0 * a * c;
-        if discriminant > 0.0 {
-            let t = (-b - discriminant.sqrt()) / (2.0 * a);
-            if t > t_min && t < t_max {
-                hit_record.t = t;
-                hit_record.position = ray.point_at(t);
-                hit_record.normal = &(&hit_record.position - &self.center) / self.radius;
-                hit_record.material = Some(&self.material);
-                return true;
-            }
 
-            let t = (-b + discriminant.sqrt()) / (2.0 * a);
-            if t > t_min && t < t_max {
-                hit_record.t = t;
-                hit_record.position = ray.point_at(t);
-                hit_record.normal = &(&hit_record.position - &self.center) / self.radius;
-                hit_record.material = Some(&self.material);
-                return true;
+        let t = {
+            || -> Option<f32> {
+                if discriminant < 0.0 {
+                    return None;
+                }
+                let t = (-b - discriminant.sqrt()) / (2.0 * a);
+                if t > t_min && t < t_max {
+                    return Some(t);
+                }
+                let t = (-b + discriminant.sqrt()) / (2.0 * a);
+                if t > t_min && t < t_max {
+                    return Some(t);
+                }
+                None
+            }()
+        };
+
+        match t {
+            Some(t) => {
+                let position = ray.point_at(t);
+                *hit_record = HitRecord {
+                    t,
+                    position,
+                    normal: &(&position - &self.center) / self.radius,
+                    material: Some(&self.material),
+                };
+                true
             }
+            None => false,
         }
-        false
     }
 }
