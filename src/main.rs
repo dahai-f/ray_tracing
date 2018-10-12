@@ -32,6 +32,11 @@ fn main() {
             0.5,
             Box::new(material::Dielectric::new(1.5)),
         )),
+        Box::new(Sphere::new(
+            &Vector3::new(-1.0, 0.0, -1.0),
+            -0.45,
+            Box::new(material::Dielectric::new(1.5)),
+        )),
     ];
 
     let camera = Camera::new();
