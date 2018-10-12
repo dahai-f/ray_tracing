@@ -45,9 +45,8 @@ impl Vector3 {
     }
 
     pub fn normalized(&self) -> Vector3 {
-        let mut result = *self;
-        result.normalize();
-        result
+        let len = self.length();
+        Vector3::new(self.x() / len, self.y() / len, self.z() / len)
     }
 
     pub fn dot(&self, other: &Vector3) -> f32 {
@@ -106,6 +105,22 @@ impl Sub for &Vector3 {
 
     fn sub(self, rhs: &Vector3) -> Vector3 {
         Vector3::new(self.x() - rhs.x(), self.y() - rhs.y(), self.z() - rhs.z())
+    }
+}
+
+impl Sub for Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, rhs: Vector3) -> Vector3 {
+        &self - &rhs
+    }
+}
+
+impl Sub<&Vector3> for Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, rhs: &Vector3) -> Vector3 {
+        &self - rhs
     }
 }
 
