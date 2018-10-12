@@ -11,35 +11,21 @@ fn main() {
     let ns = 100;
     println!("P3\n{} {}\n255", nx, ny);
 
+    let r = f32::consts::FRAC_PI_4.cos();
     let world = vec![
         Box::new(Sphere::new(
-            &Vector3::new(0.0, 0.0, -1.0),
-            0.5,
-            Box::new(material::Lambertian::new(&Vector3::new(0.1, 0.2, 0.5))),
+            &Vector3::new(-r, 0.0, -1.0),
+            r,
+            Box::new(material::Lambertian::new(&Vector3::new(0.0, 0.0, 1.0))),
         )),
         Box::new(Sphere::new(
-            &Vector3::new(0.0, -100.5, -1.0),
-            100.0,
-            Box::new(material::Lambertian::new(&Vector3::new(0.8, 0.8, 0.0))),
-        )),
-        Box::new(Sphere::new(
-            &Vector3::new(1.0, 0.0, -1.0),
-            0.5,
-            Box::new(material::Metal::new(&Vector3::new(0.8, 0.6, 0.2), 0.3)),
-        )),
-        Box::new(Sphere::new(
-            &Vector3::new(-1.0, 0.0, -1.0),
-            0.5,
-            Box::new(material::Dielectric::new(1.5)),
-        )),
-        Box::new(Sphere::new(
-            &Vector3::new(-1.0, 0.0, -1.0),
-            -0.45,
-            Box::new(material::Dielectric::new(1.5)),
+            &Vector3::new(r, 0.0, -1.0),
+            r,
+            Box::new(material::Lambertian::new(&Vector3::new(1.0, 0.0, 0.0))),
         )),
     ];
 
-    let camera = Camera::new();
+    let camera = Camera::new(90.0, nx as f32 / ny as f32);
 
     for j in (0..ny).rev() {
         for i in 0..nx {
