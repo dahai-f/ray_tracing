@@ -1,3 +1,4 @@
+use crate::*;
 use rand::distributions::*;
 use std::fmt::Display;
 use std::fmt::Error;
@@ -8,8 +9,20 @@ use std::ops::*;
 pub struct Vector3([f32; 3]);
 
 impl Vector3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
+    pub const fn new(x: f32, y: f32, z: f32) -> Vector3 {
         Vector3([x, y, z])
+    }
+
+    pub fn random_in_unit_disk() -> Vector3 {
+        loop {
+            let result = 2.0 * &RNG.with(|rng| {
+                let mut rng = rng.borrow_mut();
+                Vector3::new(rng.gen(), rng.gen(), 0.0)
+            }) - Vector3::new(1.0, 1.0, 0.0);
+            if result.squared_length() < 1.0 {
+                return result;
+            }
+        }
     }
 
     pub fn x(&self) -> f32 {
@@ -108,6 +121,14 @@ impl Sub for &Vector3 {
     }
 }
 
+impl Sub<Vector3> for &Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, rhs: Vector3) -> Vector3 {
+        self - &rhs
+    }
+}
+
 impl Sub for Vector3 {
     type Output = Vector3;
 
@@ -137,6 +158,14 @@ impl Mul for &Vector3 {
 
     fn mul(self, rhs: &Vector3) -> Vector3 {
         Vector3::new(self.x() * rhs.x(), self.y() * rhs.y(), self.z() * rhs.z())
+    }
+}
+
+impl Mul<Vector3> for f32 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: Vector3) -> Vector3 {
+        Vector3::new(self * rhs.x(), self * rhs.y(), self * rhs.z())
     }
 }
 

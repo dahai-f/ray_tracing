@@ -6,6 +6,10 @@ pub struct Camera {
     lower_left_corner: Vector3,
     horizontal: Vector3,
     vertical: Vector3,
+    u: Vector3,
+    v: Vector3,
+    _w: Vector3,
+    lens_radius: f32,
 }
 
 impl Camera {
@@ -15,9 +19,11 @@ impl Camera {
         view_up: &Vector3,
         vfov: f32,
         aspect: f32,
+        aperture: f32,
+        focus_dist: f32,
     ) -> Camera {
         let theta = vfov * (f32::consts::PI / 180.0);
-        let half_height = (theta / 2.0).tan();
+        let half_height = (theta / 2.0).tan() * focus_dist;
         let half_width = aspect * half_height;
 
         let w = (look_from - look_at).normalized();
@@ -26,16 +32,22 @@ impl Camera {
 
         Camera {
             origin: *look_from,
-            lower_left_corner: look_from - &w - &u * half_width - &v * half_height,
+            lower_left_corner: look_from - &w * focus_dist - &u * half_width - &v * half_height,
             horizontal: 2.0 * half_width * &u,
             vertical: 2.0 * half_height * &v,
+            u,
+            v,
+            _w: w,
+            lens_radius: aperture / 2.0,
         }
     }
 
     pub fn get_ray(&self, u: f32, v: f32) -> Ray {
+        let offset = self.lens_radius * Vector3::random_in_unit_disk();
+        let origin = self.origin + offset.x() * self.u + offset.y() * self.v;
         Ray::new(
-            &self.origin,
-            &(self.lower_left_corner + &self.horizontal * u + &self.vertical * v - &self.origin)
+            &origin,
+            &(self.lower_left_corner + &self.horizontal * u + &self.vertical * v - &origin)
                 .normalized(),
         )
     }
