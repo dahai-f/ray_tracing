@@ -1,5 +1,6 @@
 use crate::*;
-use rand::distributions::*;
+use rand::distributions::Standard;
+use rand::prelude::*;
 use std::fmt::Display;
 use std::fmt::Error;
 use std::fmt::Formatter;
@@ -15,10 +16,8 @@ impl Vector3 {
 
     pub fn random_in_unit_disk() -> Vector3 {
         loop {
-            let result = 2.0 * &RNG.with(|rng| {
-                let mut rng = rng.borrow_mut();
-                Vector3::new(rng.gen(), rng.gen(), 0.0)
-            }) - Vector3::new(1.0, 1.0, 0.0);
+            let result = 2.0 * &Random::with_rng(|rng| Vector3::new(rng.gen(), rng.gen(), 0.0))
+                - Vector3::new(1.0, 1.0, 0.0);
             if result.squared_length() < 1.0 {
                 return result;
             }
@@ -88,6 +87,8 @@ impl Vector3 {
         }
     }
 }
+
+unsafe impl std::marker::Send for Vector3 {}
 
 impl Add for &Vector3 {
     type Output = Vector3;

@@ -20,7 +20,7 @@ impl Material for Lambertian {
     ) -> bool {
         *scattered = Ray::new(
             &hit_record.position,
-            &(&hit_record.normal + &RNG.with(|rng| rng.borrow_mut().gen())).normalized(),
+            &(&hit_record.normal + &Random::gen()).normalized(),
         );
         *attenuation = self.albedo;
         true

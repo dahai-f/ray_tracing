@@ -1,50 +1,31 @@
+#![feature(duration_float)]
+
 extern crate rand;
 extern crate ray_tracing;
+extern crate thread_pool;
 
 use rand::prelude::*;
 use ray_tracing::*;
 use std::f32;
+use std::sync::mpsc;
+use std::sync::Arc;
+use std::time;
 
 fn main() {
-    let nx = 200;
-    let ny = 100;
-    let ns = 100;
+    let nx = 1200;
+    let ny = 800;
+    let ns = 10;
     println!("P3\n{} {}\n255", nx, ny);
 
-    let world = vec![
-        Box::new(Sphere::new(
-            &Vector3::new(0.0, 0.0, -1.0),
-            0.5,
-            Box::new(material::Lambertian::new(&Vector3::new(0.1, 0.2, 0.5))),
-        )),
-        Box::new(Sphere::new(
-            &Vector3::new(0.0, -100.5, -1.0),
-            100.0,
-            Box::new(material::Lambertian::new(&Vector3::new(0.8, 0.8, 0.0))),
-        )),
-        Box::new(Sphere::new(
-            &Vector3::new(1.0, 0.0, -1.0),
-            0.5,
-            Box::new(material::Metal::new(&Vector3::new(0.8, 0.6, 0.2), 0.3)),
-        )),
-        Box::new(Sphere::new(
-            &Vector3::new(-1.0, 0.0, -1.0),
-            0.5,
-            Box::new(material::Dielectric::new(1.5)),
-        )),
-        Box::new(Sphere::new(
-            &Vector3::new(-1.0, 0.0, -1.0),
-            -0.45,
-            Box::new(material::Dielectric::new(1.5)),
-        )),
-    ];
+    let start_time = time::Instant::now();
+    let world = Arc::new(random_scene());
 
-    let look_from = Vector3::new(3.0, 3.0, 2.0);
-    let look_at = Vector3::new(0.0, 0.0, -1.0);
-    let focus_dist = (look_from - look_at).length();
-    let aperture = 2.0_f32;
+    let look_from = Vector3::new(13.0, 2.0, 3.0);
+    let look_at = Vector3::new(0.0, 0.0, 0.0);
+    let focus_dist = 10.0;
+    let aperture = 0.1;
 
-    let camera = Camera::new(
+    let camera = Arc::new(Camera::new(
         &look_from,
         &look_at,
         &Vector3::new(0.0, 1.0, 0.0),
@@ -52,16 +33,28 @@ fn main() {
         nx as f32 / ny as f32,
         aperture,
         focus_dist,
-    );
+    ));
 
+    let thread_pool = thread_pool::ThreadPool::new(12);
+    let (color_sender, color_receiver) = mpsc::channel();
     for j in (0..ny).rev() {
         for i in 0..nx {
+            for _ in 0..ns {
+                let world = world.clone();
+                let camera = camera.clone();
+                let color_sender = color_sender.clone();
+                thread_pool.execute(move || {
+                    let u = (i as f32 + Random::gen::<f32>()) / nx as f32;
+                    let v = (j as f32 + Random::gen::<f32>()) / ny as f32;
+                    let r = camera.get_ray(u, v);
+                    color_sender
+                        .send(calc_color_by_ray(&r, &*world, 0))
+                        .unwrap();
+                });
+            }
             let mut color = Vector3::new(0.0, 0.0, 0.0);
             for _ in 0..ns {
-                let u = (i as f32 + RNG.with(|rng| rng.borrow_mut().gen::<f32>())) / nx as f32;
-                let v = (j as f32 + RNG.with(|rng| rng.borrow_mut().gen::<f32>())) / ny as f32;
-                let r = camera.get_ray(u, v);
-                color += &calc_color_by_ray(&r, &world, 0);
+                color += &color_receiver.recv().unwrap();
             }
             color /= ns as f32;
             color = Vector3::new(color.r().sqrt(), color.g().sqrt(), color.b().sqrt()); // square root to use gamma
@@ -71,9 +64,15 @@ fn main() {
             println!("{} {} {}", ir, ig, ib);
         }
     }
+
+    let after_ray_tracing = time::Instant::now();
+    eprintln!(
+        "ray tracing duration: {}s",
+        (after_ray_tracing - start_time).as_float_secs()
+    );
 }
 
-fn calc_color_by_ray<T: Hittable>(r: &Ray, hit_list: &Vec<Box<T>>, depth: u32) -> Vector3 {
+fn calc_color_by_ray(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3 {
     // limit min to 0.001 to solve shadow acne problem
     let mut hit_record = HitRecord::default();
     if hit_list.hit(r, 0.001, f32::MAX, &mut hit_record) {
@@ -93,4 +92,80 @@ fn calc_color_by_ray<T: Hittable>(r: &Ray, hit_list: &Vec<Box<T>>, depth: u32) -
         let t = 0.5 * (r.direction().y() + 1.0);
         &((1.0 - t) * &Vector3::new(1.0, 1.0, 1.0)) + &(t * &Vector3::new(0.5, 0.7, 1.0))
     }
+}
+
+fn random_scene() -> Vec<Box<Hittable>> {
+    let n = 500;
+    let mut scene: Vec<Box<Hittable>> = Vec::with_capacity(n + 1);
+    scene.push(Box::new(Sphere::new(
+        &Vector3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Box::new(material::Lambertian::new(&Vector3::new(0.5, 0.5, 0.5))),
+    )));
+    for a in -11..11 {
+        for b in -11..11 {
+            Random::with_rng(|rng| {
+                let choose_mat = rng.gen::<f32>();
+                let center = Vector3::new(
+                    a as f32 + 0.9 * rng.gen::<f32>(),
+                    0.2,
+                    b as f32 + 0.9 * rng.gen::<f32>(),
+                );
+                if (center - Vector3::new(4.0, 0.2, 0.0)).squared_length() > 0.9 * 0.9 {
+                    if choose_mat < 0.8 {
+                        // diffuse
+                        scene.push(Box::new(Sphere::new(
+                            &center,
+                            0.2,
+                            Box::new(material::Lambertian::new(&Vector3::new(
+                                rng.gen::<f32>() * rng.gen::<f32>(),
+                                rng.gen::<f32>() * rng.gen::<f32>(),
+                                rng.gen::<f32>() * rng.gen::<f32>(),
+                            ))),
+                        )));
+                    } else if choose_mat < 0.95 {
+                        // metal
+                        scene.push(Box::new(Sphere::new(
+                            &center,
+                            0.2,
+                            Box::new(material::Metal::new(
+                                &Vector3::new(
+                                    0.5 * (1.0 + rng.gen::<f32>()),
+                                    0.5 * (1.0 + rng.gen::<f32>()),
+                                    0.5 * (1.0 + rng.gen::<f32>()),
+                                ),
+                                0.5 * rng.gen::<f32>(),
+                            )),
+                        )));
+                    } else {
+                        // dielectric
+                        scene.push(Box::new(Sphere::new(
+                            &center,
+                            0.2,
+                            Box::new(material::Dielectric::new(1.5)),
+                        )));
+                    }
+                }
+            });
+        }
+    }
+
+    scene.push(Box::new(Sphere::new(
+        &Vector3::new(0.0, 1.0, 0.0),
+        1.0,
+        Box::new(material::Dielectric::new(1.5)),
+    )));
+
+    scene.push(Box::new(Sphere::new(
+        &Vector3::new(-4.0, 1.0, 0.0),
+        1.0,
+        Box::new(material::Lambertian::new(&Vector3::new(0.4, 0.2, 0.1))),
+    )));
+    scene.push(Box::new(Sphere::new(
+        &Vector3::new(4.0, 1.0, 0.0),
+        1.0,
+        Box::new(material::Metal::new(&Vector3::new(0.7, 0.6, 0.5), 0.0)),
+    )));
+
+    scene
 }

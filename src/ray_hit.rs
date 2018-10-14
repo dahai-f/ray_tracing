@@ -8,7 +8,7 @@ pub struct HitRecord<'a> {
     pub material: Option<&'a Box<Material>>,
 }
 
-pub trait Hittable {
+pub trait Hittable: Sync + Send {
     fn hit<'a, 'b: 'a>(
         &'b self,
         ray: &Ray,
@@ -18,10 +18,7 @@ pub trait Hittable {
     ) -> bool;
 }
 
-impl<THittable> Hittable for Vec<Box<THittable>>
-where
-    THittable: Hittable,
-{
+impl Hittable for &[Box<Hittable>] {
     fn hit<'a, 'b: 'a>(
         &'b self,
         ray: &Ray,
@@ -31,7 +28,7 @@ where
     ) -> bool {
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
-        for hit_ele in self {
+        for hit_ele in *self {
             if hit_ele.hit(ray, t_min, closest_so_far, hit_record) {
                 hit_anything = true;
                 closest_so_far = hit_record.t;

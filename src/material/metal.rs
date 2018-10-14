@@ -26,7 +26,7 @@ impl Material for Metal {
         *scattered = Ray::new(
             &hit_record.position,
             &(&ray_in.direction().reflect(&hit_record.normal)
-                + &(self.fuzz * &RNG.with(|rng| rng.borrow_mut().gen::<Vector3>())))
+                + &(self.fuzz * &Random::gen::<Vector3>()))
                 .normalized(),
         );
         scattered.direction().dot(&hit_record.normal) > 0.0

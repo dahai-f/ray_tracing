@@ -60,7 +60,12 @@ name = "ray_tracing"
 version = "0.1.0"
 dependencies = [
  "rand 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "thread_pool 0.1.0",
 ]
+
+[[package]]
+name = "thread_pool"
+version = "0.1.0"
 
 [[package]]
 name = "winapi"

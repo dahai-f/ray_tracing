@@ -35,7 +35,7 @@ impl Material for Dielectric {
             &hit_record.position,
             &match ray_in.direction().refract(&out_normal, ni_over_nt) {
                 Some(refracted)
-                    if RNG.with(|rng| rng.borrow_mut().gen::<f32>())
+                    if Random::gen::<f32>()
                         >= schlick(
                             if dt > 0.0 { self.ref_idx * dt } else { -dt },
                             self.ref_idx,

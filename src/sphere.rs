@@ -24,6 +24,9 @@ impl Sphere {
     }
 }
 
+unsafe impl Send for Sphere {}
+unsafe impl Sync for Sphere {}
+
 impl Hittable for Sphere {
     fn hit<'a, 'b: 'a>(
         &'b self,
