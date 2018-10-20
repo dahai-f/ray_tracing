@@ -45,6 +45,7 @@ impl Material for Dielectric {
                 }
                 _ => ray_in.direction().reflect(&out_normal),
             },
+            ray_in.time(),
         );
         true
     }

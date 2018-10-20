@@ -13,7 +13,7 @@ impl Lambertian {
 impl Material for Lambertian {
     fn scatter<'a>(
         &self,
-        _: &Ray,
+        ray_in: &Ray,
         hit_record: &HitRecord<'a>,
         attenuation: &mut Vector3,
         scattered: &mut Ray,
@@ -21,6 +21,7 @@ impl Material for Lambertian {
         *scattered = Ray::new(
             &hit_record.position,
             &(&hit_record.normal + &Random::gen()).normalized(),
+            ray_in.time(),
         );
         *attenuation = self.albedo;
         true

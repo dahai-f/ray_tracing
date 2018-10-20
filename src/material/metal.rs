@@ -28,6 +28,7 @@ impl Material for Metal {
             &(&ray_in.direction().reflect(&hit_record.normal)
                 + &(self.fuzz * &Random::gen::<Vector3>()))
                 .normalized(),
+            ray_in.time(),
         );
         scattered.direction().dot(&hit_record.normal) > 0.0
     }

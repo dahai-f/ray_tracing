@@ -36,7 +36,7 @@ impl Hittable for Sphere {
         hit_record: &mut HitRecord<'a>,
     ) -> bool {
         let co = ray.origin() - &self.center; // center to origin
-        let a = ray.direction().dot(&ray.direction());
+        let a = ray.direction().dot(ray.direction());
         let b = 2.0 * ray.direction().dot(&co);
         let c = co.dot(&co) - self.radius * self.radius;
         let discriminant = b * b - 4.0 * a * c;

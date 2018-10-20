@@ -23,7 +23,7 @@ fn main() {
     let look_from = Vector3::new(13.0, 2.0, 3.0);
     let look_at = Vector3::new(0.0, 0.0, 0.0);
     let focus_dist = 10.0;
-    let aperture = 0.1;
+    let aperture = 0.0;
 
     let camera = Arc::new(Camera::new(
         &look_from,
@@ -33,6 +33,8 @@ fn main() {
         nx as f32 / ny as f32,
         aperture,
         focus_dist,
+        0.0,
+        1.0,
     ));
 
     let thread_pool = thread_pool::ThreadPool::new(12);
@@ -114,8 +116,11 @@ fn random_scene() -> Vec<Box<Hittable>> {
                 if (center - Vector3::new(4.0, 0.2, 0.0)).squared_length() > 0.9 * 0.9 {
                     if choose_mat < 0.8 {
                         // diffuse
-                        scene.push(Box::new(Sphere::new(
+                        scene.push(Box::new(MovingSphere::new(
                             &center,
+                            &(center + Vector3::new(0.0, 0.5 * rng.gen::<f32>(), 0.0)),
+                            0.0,
+                            1.0,
                             0.2,
                             Box::new(material::Lambertian::new(&Vector3::new(
                                 rng.gen::<f32>() * rng.gen::<f32>(),
