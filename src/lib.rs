@@ -9,6 +9,7 @@ pub use self::ray_hit::{HitRecord, Hittable};
 pub use self::sphere::Sphere;
 pub use self::vector3::Vector3;
 
+mod aabb;
 mod camera;
 pub mod material;
 mod moving_sphere;
