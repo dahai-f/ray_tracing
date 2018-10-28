@@ -80,12 +80,13 @@ fn calc_color_by_ray(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3
     if hit_list.hit(r, 0.001, f32::MAX, &mut hit_record) {
         let mut attenuation = Vector3::default();
         let mut scattered = Ray::default();
-        if depth < 50 && hit_record.material.unwrap().scatter(
-            r,
-            &hit_record,
-            &mut attenuation,
-            &mut scattered,
-        ) {
+        if depth < 50
+            && hit_record.material.unwrap().scatter(
+                r,
+                &hit_record,
+                &mut attenuation,
+                &mut scattered,
+            ) {
             return &attenuation * &calc_color_by_ray(&scattered, hit_list, depth + 1);
         } else {
             Vector3::new(0.0, 0.0, 0.0)

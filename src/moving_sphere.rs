@@ -78,4 +78,14 @@ impl Hittable for MovingSphere {
             None => false,
         }
     }
+
+    fn bounding_box(&self, t0: f32, t1: f32, aabb: &mut AABB) -> bool {
+        let half = Vector3::new(self.radius, self.radius, self.radius);
+        let center = self.center(t0);
+        let aabb0 = AABB::new(center - half, center + half);
+        let center = self.center(t1);
+        let aabb1 = AABB::new(center - half, center + half);
+        *aabb = aabb0.surrounding(&aabb1);
+        true
+    }
 }

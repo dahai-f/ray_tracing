@@ -43,6 +43,22 @@ impl Vector3 {
         self.0[2]
     }
 
+    pub fn min(&self, other: &Vector3) -> Vector3 {
+        Vector3::new(
+            self.x().min(other.x()),
+            self.y().min(other.y()),
+            self.z().min(other.z()),
+        )
+    }
+
+    pub fn max(&self, other: &Vector3) -> Vector3 {
+        Vector3::new(
+            self.x().max(other.x()),
+            self.y().max(other.y()),
+            self.z().max(other.z()),
+        )
+    }
+
     pub fn length(&self) -> f32 {
         (self.x() * self.x() + self.y() * self.y() + self.z() * self.z()).sqrt()
     }

@@ -25,6 +25,7 @@ impl Sphere {
 }
 
 unsafe impl Send for Sphere {}
+
 unsafe impl Sync for Sphere {}
 
 impl Hittable for Sphere {
@@ -71,5 +72,11 @@ impl Hittable for Sphere {
             }
             None => false,
         }
+    }
+
+    fn bounding_box(&self, _t0: f32, _t1: f32, aabb: &mut AABB) -> bool {
+        let half = Vector3::new(self.radius, self.radius, self.radius);
+        *aabb = AABB::new(self.center - half, self.center + half);
+        true
     }
 }

@@ -1,12 +1,21 @@
 use core::mem;
 use crate::*;
 
+#[derive(Default, Copy, Clone)]
 pub struct AABB {
     min: Vector3,
     max: Vector3,
 }
 
 impl AABB {
+    pub fn new(min: Vector3, max: Vector3) -> AABB {
+        AABB { min, max }
+    }
+
+    pub fn surrounding(&self, other: &AABB) -> AABB {
+        AABB::new(self.min.min(&other.min), self.max.max(&other.max))
+    }
+
     pub fn hit(&self, ray: &Ray, mut t_min: f32, mut t_max: f32) -> bool {
         for i in 0..3 {
             let inv_d = 1.0 / ray.direction()[i];
