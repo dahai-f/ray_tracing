@@ -1,20 +1,66 @@
 use crate::*;
+use std::cmp::Ordering;
+use std::sync::Arc;
 
 pub struct BvhNode {
     aabb: AABB,
-    left_child: Box<Hittable>,
-    right_child: Box<Hittable>,
+    left_child: Arc<Hittable>,
+    right_child: Arc<Hittable>,
 }
 
 impl BvhNode {
-    pub fn new(aabb: AABB, left_child: Box<Hittable>, right_child: Box<Hittable>) -> BvhNode {
+    fn new(aabb: AABB, left_child: Arc<Hittable>, right_child: Arc<Hittable>) -> BvhNode {
         BvhNode {
             aabb,
             left_child,
             right_child,
         }
     }
+
+    pub fn from_hit_list(hittable_list: &mut [Arc<Hittable>], t0: f32, t1: f32) -> BvhNode {
+        if hittable_list.len() == 0 {
+            panic!("no hit list");
+        }
+
+        let axis = Random::gen::<usize>() % 3;
+        hittable_list.sort_by(|a, b| {
+            let mut a_box = AABB::default();
+            let mut b_box = AABB::default();
+            if !a.bounding_box(t0, t1, &mut a_box) || !b.bounding_box(t0, t1, &mut b_box) {
+                panic!("no bounding box");
+            }
+            if a_box.min()[axis] < b_box.min()[axis] {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
+        });
+
+        let (left_child, right_child) = {
+            if hittable_list.len() == 1 {
+                (hittable_list[0].clone(), hittable_list[0].clone())
+            } else if hittable_list.len() == 2 {
+                (hittable_list[0].clone(), hittable_list[1].clone())
+            } else {
+                let mid = hittable_list.len() / 2;
+                (
+                    if mid == 1 { hittable_list[0].clone() } else { BvhNode::from_hit_list(hittable_list[..mid], t0, t1) },
+                    BvhNode::from_hit_list(hittable_list[mid..], t0, t1)
+                )
+            }
+        };
+
+        let mut left_box = AABB::default();
+        let mut right_box = AABB::default();
+        if !left_child.bounding_box(t0, t1, &mut left_box) || !right_child.bounding_box(t0, t1, &mut right_box) {
+            panic!("no bounding box");
+        }
+
+        BvhNode::new(left_box.surrounding(&right_box), left_child, right_child)
+    }
 }
+
+unsafe impl Send for BvhNode {}
 
 impl Hittable for BvhNode {
     fn hit<'a, 'b: 'a>(
