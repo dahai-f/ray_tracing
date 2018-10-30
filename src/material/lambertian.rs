@@ -1,16 +1,17 @@
 use crate::*;
+use crate::texture::*;
 
-pub struct Lambertian {
-    albedo: Vector3,
+pub struct Lambertian<T: Texture> {
+    albedo: T,
 }
 
-impl Lambertian {
-    pub fn new(albedo: &Vector3) -> Lambertian {
-        Lambertian { albedo: *albedo }
+impl<T: Texture> Lambertian<T> {
+    pub fn new(albedo: T) -> Lambertian<T> {
+        Lambertian { albedo }
     }
 }
 
-impl Material for Lambertian {
+impl<T: Texture> Material for Lambertian<T> {
     fn scatter<'a>(
         &self,
         ray_in: &Ray,
@@ -23,7 +24,7 @@ impl Material for Lambertian {
             &(&hit_record.normal + &Random::gen()).normalized(),
             ray_in.time(),
         );
-        *attenuation = self.albedo;
+        *attenuation = self.albedo.value(0.0, 0.0, &hit_record.position);
         true
     }
 }

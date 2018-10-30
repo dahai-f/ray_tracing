@@ -82,11 +82,11 @@ fn calc_color_by_ray(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3
         let mut scattered = Ray::default();
         if depth < 50
             && hit_record.material.unwrap().scatter(
-                r,
-                &hit_record,
-                &mut attenuation,
-                &mut scattered,
-            ) {
+            r,
+            &hit_record,
+            &mut attenuation,
+            &mut scattered,
+        ) {
             return &attenuation * &calc_color_by_ray(&scattered, hit_list, depth + 1);
         } else {
             Vector3::new(0.0, 0.0, 0.0)
@@ -103,7 +103,7 @@ fn random_scene() -> Vec<Box<Hittable>> {
     scene.push(Box::new(Sphere::new(
         &Vector3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Box::new(material::Lambertian::new(&Vector3::new(0.5, 0.5, 0.5))),
+        Box::new(material::Lambertian::new(texture::ConstantTexture::new(0.5, 0.5, 0.5))),
     )));
     for a in -11..11 {
         for b in -11..11 {
@@ -123,7 +123,7 @@ fn random_scene() -> Vec<Box<Hittable>> {
                             0.0,
                             1.0,
                             0.2,
-                            Box::new(material::Lambertian::new(&Vector3::new(
+                            Box::new(material::Lambertian::new(texture::ConstantTexture::new(
                                 rng.gen::<f32>() * rng.gen::<f32>(),
                                 rng.gen::<f32>() * rng.gen::<f32>(),
                                 rng.gen::<f32>() * rng.gen::<f32>(),
@@ -165,7 +165,7 @@ fn random_scene() -> Vec<Box<Hittable>> {
     scene.push(Box::new(Sphere::new(
         &Vector3::new(-4.0, 1.0, 0.0),
         1.0,
-        Box::new(material::Lambertian::new(&Vector3::new(0.4, 0.2, 0.1))),
+        Box::new(material::Lambertian::new(texture::ConstantTexture::new(0.4, 0.2, 0.1))),
     )));
     scene.push(Box::new(Sphere::new(
         &Vector3::new(4.0, 1.0, 0.0),
