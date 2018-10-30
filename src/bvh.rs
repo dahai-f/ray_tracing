@@ -36,7 +36,7 @@ impl BvhNode {
             }
         });
 
-        let (left_child, right_child) = {
+        let (left_child, right_child): (Arc<Hittable>, Arc<Hittable>) = {
             if hittable_list.len() == 1 {
                 (hittable_list[0].clone(), hittable_list[0].clone())
             } else if hittable_list.len() == 2 {
@@ -44,15 +44,21 @@ impl BvhNode {
             } else {
                 let mid = hittable_list.len() / 2;
                 (
-                    if mid == 1 { hittable_list[0].clone() } else { BvhNode::from_hit_list(hittable_list[..mid], t0, t1) },
-                    BvhNode::from_hit_list(hittable_list[mid..], t0, t1)
+                    if mid == 1 {
+                        hittable_list[0].clone()
+                    } else {
+                        Arc::new(BvhNode::from_hit_list(&mut hittable_list[..mid], t0, t1))
+                    },
+                    Arc::new(BvhNode::from_hit_list(&mut hittable_list[mid..], t0, t1)),
                 )
             }
         };
 
         let mut left_box = AABB::default();
         let mut right_box = AABB::default();
-        if !left_child.bounding_box(t0, t1, &mut left_box) || !right_child.bounding_box(t0, t1, &mut right_box) {
+        if !left_child.bounding_box(t0, t1, &mut left_box)
+            || !right_child.bounding_box(t0, t1, &mut right_box)
+        {
             panic!("no bounding box");
         }
 

@@ -12,6 +12,10 @@ impl AABB {
         AABB { min, max }
     }
 
+    pub fn min(&self) -> &Vector3 {
+        &self.min
+    }
+
     pub fn surrounding(&self, other: &AABB) -> AABB {
         AABB::new(self.min.min(&other.min), self.max.max(&other.max))
     }
