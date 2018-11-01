@@ -21,3 +21,4 @@ pub mod ray_hit;
 mod sphere;
 mod vector3;
 pub mod texture;
+mod perlin;
