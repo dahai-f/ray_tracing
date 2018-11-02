@@ -46,3 +46,21 @@ impl<T: Texture, U: Texture> Texture for CheckerTexture<T, U> {
         }
     }
 }
+
+#[derive(Clone)]
+pub struct NoiseTexture {
+    _phantom_data: (),
+}
+
+impl NoiseTexture {
+    pub fn new() -> NoiseTexture {
+        NoiseTexture { _phantom_data: () }
+    }
+}
+
+impl Texture for NoiseTexture {
+    fn value(&self, _u: f32, _v: f32, position: &Vector3) -> Vector3 {
+        use crate::perlin::PERLIN;
+        Vector3::new(1.0, 1.0, 1.0) * PERLIN.noise(position)
+    }
+}

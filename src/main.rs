@@ -6,8 +6,8 @@ extern crate thread_pool;
 
 use ray_tracing::*;
 use std::f32;
-use std::sync::Arc;
 use std::sync::mpsc;
+use std::sync::Arc;
 use std::time;
 
 fn main() {
@@ -17,7 +17,7 @@ fn main() {
     println!("P3\n{} {}\n255", nx, ny);
 
     let start_time = time::Instant::now();
-    let world = Arc::new(scenes::two_spheres());
+    let world = Arc::new(scenes::two_perlin_sphere());
 
     let look_from = Vector3::new(13.0, 2.0, 3.0);
     let look_at = Vector3::new(0.0, 0.0, 0.0);
@@ -81,11 +81,11 @@ fn calc_color_by_ray(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3
         let mut scattered = Ray::default();
         if depth < 50
             && hit_record.material.unwrap().scatter(
-            r,
-            &hit_record,
-            &mut attenuation,
-            &mut scattered,
-        ) {
+                r,
+                &hit_record,
+                &mut attenuation,
+                &mut scattered,
+            ) {
             return &attenuation * &calc_color_by_ray(&scattered, hit_list, depth + 1);
         } else {
             Vector3::new(0.0, 0.0, 0.0)

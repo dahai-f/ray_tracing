@@ -1,9 +1,9 @@
+use crate::material::*;
+use crate::texture::*;
 use crate::*;
 use rand::prelude::*;
 
 pub fn random() -> Vec<Box<Hittable>> {
-    use crate::texture::*;
-
     let n = 500;
     let mut scene: Vec<Box<Hittable>> = Vec::with_capacity(n + 1);
 
@@ -14,7 +14,7 @@ pub fn random() -> Vec<Box<Hittable>> {
     scene.push(Box::new(Sphere::new(
         &Vector3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Box::new(material::Lambertian::new(checker)),
+        Box::new(Lambertian::new(checker)),
     )));
     for a in -11..11 {
         for b in -11..11 {
@@ -90,7 +90,6 @@ pub fn random() -> Vec<Box<Hittable>> {
 }
 
 pub fn two_spheres() -> Vec<Box<Hittable>> {
-    use crate::texture::*;
     let checker = CheckerTexture::new(
         ConstantTexture::new(0.2, 0.3, 0.1),
         ConstantTexture::new(0.9, 0.9, 0.9),
@@ -106,6 +105,23 @@ pub fn two_spheres() -> Vec<Box<Hittable>> {
             &Vector3::new(0.0, 10.0, 0.0),
             10.0,
             Box::new(crate::material::Lambertian::new(checker)),
+        )),
+    ]
+}
+
+pub fn two_perlin_sphere() -> Vec<Box<Hittable>> {
+    let noise = NoiseTexture::new();
+
+    vec![
+        Box::new(Sphere::new(
+            &Vector3::new(0.0, -1000.0, 0.0),
+            1000.0,
+            Box::new(Lambertian::new(noise.clone())),
+        )),
+        Box::new(Sphere::new(
+            &Vector3::new(0.0, 2.0, 0.0),
+            2.0,
+            Box::new(Lambertian::new(noise)),
         )),
     ]
 }

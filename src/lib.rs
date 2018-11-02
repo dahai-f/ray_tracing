@@ -1,4 +1,6 @@
 extern crate rand;
+#[macro_use]
+extern crate lazy_static;
 
 pub use self::aabb::AABB;
 pub use self::camera::Camera;
@@ -15,6 +17,7 @@ mod bvh;
 mod camera;
 pub mod material;
 mod moving_sphere;
+mod perlin;
 mod random;
 mod ray;
 pub mod ray_hit;
@@ -22,5 +25,3 @@ pub mod scenes;
 mod sphere;
 pub mod texture;
 mod vector3;
-pub mod texture;
-mod perlin;

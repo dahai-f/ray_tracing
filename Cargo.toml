@@ -1,9 +1,10 @@
 [package]
 name = "ray_tracing"
 version = "0.1.0"
-authors = ["abbot <1119369173@qq.com>"]
+authors = ["mango0110 <1119369173@qq.com>"]
 edition = "2018"
 
 [dependencies]
 rand = "*"
+lazy_static = "*"
 thread_pool = {path="../thread_pool"}
