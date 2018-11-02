@@ -1,5 +1,5 @@
-use crate::*;
 use crate::texture::*;
+use crate::*;
 
 pub struct Lambertian<T: Texture> {
     albedo: T,
