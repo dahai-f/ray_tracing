@@ -110,7 +110,7 @@ pub fn two_spheres() -> Vec<Box<Hittable>> {
 }
 
 pub fn two_perlin_sphere() -> Vec<Box<Hittable>> {
-    let noise = NoiseTexture::new();
+    let noise = NoiseTexture::new(10.0);
 
     vec![
         Box::new(Sphere::new(

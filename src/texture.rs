@@ -49,18 +49,18 @@ impl<T: Texture, U: Texture> Texture for CheckerTexture<T, U> {
 
 #[derive(Clone)]
 pub struct NoiseTexture {
-    _phantom_data: (),
+    scale: f32,
 }
 
 impl NoiseTexture {
-    pub fn new() -> NoiseTexture {
-        NoiseTexture { _phantom_data: () }
+    pub fn new(scale: f32) -> NoiseTexture {
+        NoiseTexture { scale }
     }
 }
 
 impl Texture for NoiseTexture {
     fn value(&self, _u: f32, _v: f32, position: &Vector3) -> Vector3 {
         use crate::perlin::PERLIN;
-        Vector3::new(1.0, 1.0, 1.0) * PERLIN.noise(position)
+        Vector3::new(1.0, 1.0, 1.0) * PERLIN.noise(&(position * self.scale)).mul_add(0.5, 0.5)
     }
 }
