@@ -30,13 +30,13 @@ impl Perlin {
         let v = position.y() - j;
         let w = position.z() - k;
         let mut c = [[[0.0; 2]; 2]; 2];
-        let (i, j, k) = (i as i32, j as i32, k as i32);
+        let (i, j, k) = (i as usize, j as usize, k as usize);
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
-                    c[di][dj][dk] = self.ran_float[self.perm_x[(i + di as i32) as usize & 0xFF]
-                        ^ self.perm_y[(j + dj as i32) as usize & 0xFF]
-                        ^ self.perm_z[(k + dk as i32) as usize & 0xFF]];
+                    c[di][dj][dk] = self.ran_float[self.perm_x[i.wrapping_add(di) & 0xFF]
+                        ^ self.perm_y[j.wrapping_add(dj) & 0xFF]
+                        ^ self.perm_z[k.wrapping_add(dk) & 0xFF]];
                 }
             }
         }
