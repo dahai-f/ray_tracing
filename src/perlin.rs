@@ -23,14 +23,40 @@ impl Perlin {
     }
 
     pub fn noise(&self, position: &Vector3) -> f32 {
-        let _u = position.x() - position.x().floor();
-        let _v = position.y() - position.y().floor();
-        let _w = position.z() - position.z().floor();
-        let i = (position.x() * 4.0) as usize & 0xFF;
-        let j = (position.y() * 4.0) as usize & 0xFF;
-        let k = (position.z() * 4.0) as usize & 0xFF;
-        self.ran_float[self.perm_x[i] ^ self.perm_y[j] ^ self.perm_z[k]]
+        let i = position.x().floor();
+        let j = position.y().floor();
+        let k = position.z().floor();
+        let u = position.x() - i;
+        let v = position.y() - j;
+        let w = position.z() - k;
+        let mut c = [[[0.0; 2]; 2]; 2];
+        let (i, j, k) = (i as i32, j as i32, k as i32);
+        for di in 0..2 {
+            for dj in 0..2 {
+                for dk in 0..2 {
+                    c[di][dj][dk] = self.ran_float[self.perm_x[(i + di as i32) as usize & 0xFF]
+                        ^ self.perm_y[(j + dj as i32) as usize & 0xFF]
+                        ^ self.perm_z[(k + dk as i32) as usize & 0xFF]];
+                }
+            }
+        }
+        tri_linear_interp(&c, u, v, w)
     }
+}
+
+fn tri_linear_interp(c: &[[[f32; 2]; 2]; 2], u: f32, v: f32, w: f32) -> f32 {
+    let mut accum = 0.0;
+    for i in 0..2 {
+        for j in 0..2 {
+            for k in 0..2 {
+                accum += (i as f32 * u + (1 - i) as f32 * (1.0 - u))
+                    * (j as f32 * v + (1 - j) as f32 * (1.0 - v))
+                    * (k as f32 * w + (1 - k) as f32 * (1.0 - w))
+                    * c[i][j][k];
+            }
+        }
+    }
+    accum
 }
 
 fn perlin_generate() -> [f32; 256] {
