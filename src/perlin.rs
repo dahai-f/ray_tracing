@@ -29,8 +29,15 @@ impl Perlin {
         let u = position.x() - i;
         let v = position.y() - j;
         let w = position.z() - k;
-        let mut c = [[[0.0; 2]; 2]; 2];
+
         let (i, j, k) = (i as usize, j as usize, k as usize);
+        let (u, v, w) = (
+            u * u * (3.0 - 2.0 * u),
+            v * v * (3.0 - 2.0 * v),
+            w * w * (3.0 - 2.0 * w),
+        );
+
+        let mut c = [[[0.0; 2]; 2]; 2];
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
