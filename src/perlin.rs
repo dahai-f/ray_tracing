@@ -44,6 +44,18 @@ impl Perlin {
         }
         perlin_interp(&c, u, v, w)
     }
+
+    pub fn turbulence(&self, position: &Vector3, depth: i32) -> f32 {
+        let mut accum = 0.0;
+        let mut p = *position;
+        let mut weight = 1.0;
+        for i in 0..depth {
+            accum += weight * self.noise(&p);
+            weight *= 0.5;
+            p *= 2.0;
+        }
+        accum.abs()
+    }
 }
 
 fn perlin_interp(c: &[[[Vector3; 2]; 2]; 2], u: f32, v: f32, w: f32) -> f32 {
