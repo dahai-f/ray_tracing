@@ -61,6 +61,11 @@ impl NoiseTexture {
 impl Texture for NoiseTexture {
     fn value(&self, _u: f32, _v: f32, position: &Vector3) -> Vector3 {
         use crate::perlin::PERLIN;
-        Vector3::new(1.0, 1.0, 1.0) * PERLIN.turbulence(&(position * self.scale), 7)
+        //        Vector3::new(1.0, 1.0, 1.0) * ((PERLIN.turbulence(&(position * self.scale), 7) + 1.0) * 0.5)
+        //        Vector3::new(1.0, 1.0, 1.0) * PERLIN.turbulence(&(position * self.scale), 7)
+        Vector3::new(1.0, 1.0, 1.0)
+            * (0.5
+                * (1.0
+                    + (self.scale * position.z() + 10.0 * PERLIN.turbulence(&position, 7)).sin()))
     }
 }
