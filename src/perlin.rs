@@ -49,7 +49,7 @@ impl Perlin {
         let mut accum = 0.0;
         let mut p = *position;
         let mut weight = 1.0;
-        for i in 0..depth {
+        for _ in 0..depth {
             accum += weight * self.noise(&p);
             weight *= 0.5;
             p *= 2.0;
