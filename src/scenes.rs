@@ -1,7 +1,9 @@
+use rand::prelude::*;
+
 use crate::material::*;
 use crate::texture::*;
 use crate::*;
-use rand::prelude::*;
+use std::f32;
 
 pub fn random() -> Vec<Box<Hittable>> {
     let n = 500;
@@ -124,4 +126,50 @@ pub fn two_perlin_sphere() -> Vec<Box<Hittable>> {
             Box::new(Lambertian::new(noise)),
         )),
     ]
+}
+
+pub fn earth() -> (Vec<Box<Hittable>>, Camera) {
+    (
+        vec![Box::new(Sphere::new(
+            &Vector3::new(0.0, 0.0, 0.0),
+            1.0,
+            Box::new(material::Lambertian::new(ImageTexture::open(
+                "resource/earth.jpg",
+            ))),
+        ))],
+        Camera::new(
+            &Vector3::new(0.0, 0.0, 10.0),
+            &Vector3::zero(),
+            &Vector3::up(),
+            2.0 * f32::atan(1.2 / 10.0) * 180.0 / f32::consts::PI,
+            1200.0 / 800.0,
+            0.0,
+            10.0,
+            0.0,
+            0.0,
+        ),
+    )
+}
+
+pub fn earth_other_half() -> (Vec<Box<Hittable>>, Camera) {
+    (
+        vec![Box::new(Sphere::new(
+            &Vector3::new(0.0, 0.0, 0.0),
+            1.0,
+            Box::new(material::Lambertian::new(ImageTexture::open(
+                "resource/earth.jpg",
+            ))),
+        ))],
+        Camera::new(
+            &Vector3::new(0.0, 0.0, -10.0),
+            &Vector3::zero(),
+            &Vector3::up(),
+            2.0 * f32::atan(1.2 / 10.0) * 180.0 / f32::consts::PI,
+            1200.0 / 800.0,
+            0.0,
+            10.0,
+            0.0,
+            0.0,
+        ),
+    )
 }

@@ -1,3 +1,7 @@
+use std::ops::Deref;
+
+use image::*;
+
 use crate::*;
 
 pub trait Texture {
@@ -67,5 +71,37 @@ impl Texture for NoiseTexture {
             * (0.5
                 * (1.0
                     + (self.scale * position.z() + 10.0 * PERLIN.turbulence(&position, 7)).sin()))
+    }
+}
+
+pub struct ImageTexture(DynamicImage);
+
+impl ImageTexture {
+    pub fn open(path: &str) -> ImageTexture {
+        ImageTexture(image::open(path).unwrap())
+    }
+}
+
+impl Deref for ImageTexture {
+    type Target = DynamicImage;
+
+    fn deref(&self) -> &<Self as Deref>::Target {
+        &self.0
+    }
+}
+
+impl Texture for ImageTexture {
+    fn value(&self, u: f32, v: f32, _: &Vector3) -> Vector3 {
+        let (w, h) = self.0.dimensions();
+        let x = (u * w as f32) as i32;
+        let y = ((1.0 - v) * h as f32 - 0.001) as i32;
+        let x = (x.max(0) as u32).min(w - 1);
+        let y = (y.max(0) as u32).min(h - 1);
+        let pixel = self.get_pixel(x, y);
+        Vector3::new(
+            pixel[0] as f32 / 255.0,
+            pixel[1] as f32 / 255.0,
+            pixel[2] as f32 / 255.0,
+        )
     }
 }

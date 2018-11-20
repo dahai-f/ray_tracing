@@ -17,24 +17,27 @@ fn main() {
     println!("P3\n{} {}\n255", nx, ny);
 
     let start_time = time::Instant::now();
-    let world = Arc::new(scenes::two_perlin_sphere());
+    //    let world = Arc::new(scenes::two_perlin_sphere());
+    //
+    //    let look_from = Vector3::new(13.0, 2.0, 3.0);
+    //    let look_at = Vector3::new(0.0, 0.0, 0.0);
+    //    let focus_dist = 10.0;
+    //    let aperture = 0.0;
 
-    let look_from = Vector3::new(13.0, 2.0, 3.0);
-    let look_at = Vector3::new(0.0, 0.0, 0.0);
-    let focus_dist = 10.0;
-    let aperture = 0.0;
+    //    let camera = Arc::new(Camera::new(
+    //        &look_from,
+    //        &look_at,
+    //        &Vector3::new(0.0, 1.0, 0.0),
+    //        20.0,
+    //        nx as f32 / ny as f32,
+    //        aperture,
+    //        focus_dist,
+    //        0.0,
+    //        1.0,
+    //    ));
 
-    let camera = Arc::new(Camera::new(
-        &look_from,
-        &look_at,
-        &Vector3::new(0.0, 1.0, 0.0),
-        20.0,
-        nx as f32 / ny as f32,
-        aperture,
-        focus_dist,
-        0.0,
-        1.0,
-    ));
+    let (world, camera) = scenes::earth_other_half();
+    let (world, camera) = (Arc::new(world), Arc::new(camera));
 
     let thread_pool = thread_pool::ThreadPool::new(12);
     let (color_sender, color_receiver) = mpsc::channel();

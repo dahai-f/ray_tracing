@@ -13,6 +13,12 @@ impl Vector3 {
     pub const fn new(x: f32, y: f32, z: f32) -> Vector3 {
         Vector3([x, y, z])
     }
+    pub const fn zero() -> Vector3 {
+        Vector3::new(0.0, 0.0, 0.0)
+    }
+    pub const fn up() -> Vector3 {
+        Vector3::new(0.0, 1.0, 0.0)
+    }
 
     pub fn random_in_unit_disk() -> Vector3 {
         loop {

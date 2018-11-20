@@ -8,3 +8,4 @@ edition = "2018"
 rand = "*"
 lazy_static = "*"
 thread_pool = {path="../thread_pool"}
+image = "*"

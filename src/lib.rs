@@ -1,4 +1,6 @@
+extern crate image;
 extern crate rand;
+
 #[macro_use]
 extern crate lazy_static;
 
@@ -15,6 +17,7 @@ pub use self::vector3::Vector3;
 mod aabb;
 mod bvh;
 mod camera;
+mod common;
 pub mod material;
 mod moving_sphere;
 mod perlin;

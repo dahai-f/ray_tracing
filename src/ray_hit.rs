@@ -6,6 +6,8 @@ pub struct HitRecord<'a> {
     pub position: Vector3,
     pub normal: Vector3,
     pub material: Option<&'a Box<Material>>,
+    pub u: f32,
+    pub v: f32,
 }
 
 pub trait Hittable: Sync + Send {

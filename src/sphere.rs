@@ -62,11 +62,15 @@ impl Hittable for Sphere {
         match t {
             Some(t) => {
                 let position = ray.point_at(t);
+                let normal = &(&position - &self.center) / self.radius;
+                let (u, v) = common::get_sphere_uv(&normal);
                 *hit_record = HitRecord {
                     t,
                     position,
-                    normal: &(&position - &self.center) / self.radius,
+                    normal,
                     material: Some(&self.material),
+                    u,
+                    v,
                 };
                 true
             }
