@@ -19,6 +19,9 @@ impl Vector3 {
     pub const fn up() -> Vector3 {
         Vector3::new(0.0, 1.0, 0.0)
     }
+    pub const fn forward() -> Vector3 {
+        Vector3::new(0.0, 0.0, 1.0)
+    }
 
     pub fn random_in_unit_disk() -> Vector3 {
         loop {

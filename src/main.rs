@@ -51,9 +51,7 @@ fn main() {
                     let u = (i as f32 + Random::gen::<f32>()) / nx as f32;
                     let v = (j as f32 + Random::gen::<f32>()) / ny as f32;
                     let r = camera.get_ray(u, v);
-                    color_sender
-                        .send(calc_color_by_ray(&r, &*world, 0))
-                        .unwrap();
+                    color_sender.send(render(&r, &*world, 0)).unwrap();
                 });
             }
             let mut color = Vector3::new(0.0, 0.0, 0.0);
@@ -76,12 +74,17 @@ fn main() {
     );
 }
 
-fn calc_color_by_ray(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3 {
+fn render(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3 {
     // limit min to 0.001 to solve shadow acne problem
     let mut hit_record = HitRecord::default();
     if hit_list.hit(r, 0.001, f32::MAX, &mut hit_record) {
         let mut attenuation = Vector3::default();
         let mut scattered = Ray::default();
+        let emitted =
+            hit_record
+                .material
+                .unwrap()
+                .emitted(hit_record.u, hit_record.v, &hit_record.position);
         if depth < 50
             && hit_record.material.unwrap().scatter(
                 r,
@@ -89,12 +92,11 @@ fn calc_color_by_ray(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3
                 &mut attenuation,
                 &mut scattered,
             ) {
-            return &attenuation * &calc_color_by_ray(&scattered, hit_list, depth + 1);
+            return emitted + &attenuation * &render(&scattered, hit_list, depth + 1);
         } else {
-            Vector3::new(0.0, 0.0, 0.0)
+            emitted
         }
     } else {
-        let t = 0.5 * (r.direction().y() + 1.0);
-        &((1.0 - t) * &Vector3::new(1.0, 1.0, 1.0)) + &(t * &Vector3::new(0.5, 0.7, 1.0))
+        Vector3::zero()
     }
 }

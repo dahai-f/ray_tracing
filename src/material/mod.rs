@@ -11,8 +11,13 @@ pub trait Material {
         attenuation: &mut Vector3,
         scattered: &mut Ray,
     ) -> bool;
+
+    fn emitted(&self, _u: f32, _v: f32, _position: &Vector3) -> Vector3 {
+        Vector3::zero()
+    }
 }
 
 mod dielectric;
+mod diffuse_light;
 mod lambertian;
 mod metal;

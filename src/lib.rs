@@ -28,3 +28,4 @@ pub mod scenes;
 mod sphere;
 pub mod texture;
 mod vector3;
+mod rect;
