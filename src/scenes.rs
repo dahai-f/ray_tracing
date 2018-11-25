@@ -1,9 +1,11 @@
+use std::f32;
+use std::sync::Arc;
+
 use rand::prelude::*;
 
 use crate::material::*;
 use crate::texture::*;
 use crate::*;
-use std::f32;
 
 pub fn random() -> Vec<Box<Hittable>> {
     let n = 500;
@@ -16,7 +18,7 @@ pub fn random() -> Vec<Box<Hittable>> {
     scene.push(Box::new(Sphere::new(
         &Vector3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Box::new(Lambertian::new(checker)),
+        Lambertian::new(checker),
     )));
     for a in -11..11 {
         for b in -11..11 {
@@ -36,32 +38,32 @@ pub fn random() -> Vec<Box<Hittable>> {
                             0.0,
                             1.0,
                             0.2,
-                            Box::new(material::Lambertian::new(texture::ConstantTexture::new(
+                            Lambertian::new(texture::ConstantTexture::new(
                                 rng.gen::<f32>() * rng.gen::<f32>(),
                                 rng.gen::<f32>() * rng.gen::<f32>(),
                                 rng.gen::<f32>() * rng.gen::<f32>(),
-                            ))),
+                            )),
                         )));
                     } else if choose_mat < 0.95 {
                         // metal
                         scene.push(Box::new(Sphere::new(
                             &center,
                             0.2,
-                            Box::new(material::Metal::new(
+                            Metal::new(
                                 &Vector3::new(
                                     0.5 * (1.0 + rng.gen::<f32>()),
                                     0.5 * (1.0 + rng.gen::<f32>()),
                                     0.5 * (1.0 + rng.gen::<f32>()),
                                 ),
                                 0.5 * rng.gen::<f32>(),
-                            )),
+                            ),
                         )));
                     } else {
                         // dielectric
                         scene.push(Box::new(Sphere::new(
                             &center,
                             0.2,
-                            Box::new(material::Dielectric::new(1.5)),
+                            material::Dielectric::new(1.5),
                         )));
                     }
                 }
@@ -72,20 +74,18 @@ pub fn random() -> Vec<Box<Hittable>> {
     scene.push(Box::new(Sphere::new(
         &Vector3::new(0.0, 1.0, 0.0),
         1.0,
-        Box::new(material::Dielectric::new(1.5)),
+        material::Dielectric::new(1.5),
     )));
 
     scene.push(Box::new(Sphere::new(
         &Vector3::new(-4.0, 1.0, 0.0),
         1.0,
-        Box::new(material::Lambertian::new(texture::ConstantTexture::new(
-            0.4, 0.2, 0.1,
-        ))),
+        material::Lambertian::new(texture::ConstantTexture::new(0.4, 0.2, 0.1)),
     )));
     scene.push(Box::new(Sphere::new(
         &Vector3::new(4.0, 1.0, 0.0),
         1.0,
-        Box::new(material::Metal::new(&Vector3::new(0.7, 0.6, 0.5), 0.0)),
+        material::Metal::new(&Vector3::new(0.7, 0.6, 0.5), 0.0),
     )));
 
     scene
@@ -101,31 +101,53 @@ pub fn two_spheres() -> Vec<Box<Hittable>> {
         Box::new(Sphere::new(
             &Vector3::new(0.0, -10.0, 0.0),
             10.0,
-            Box::new(crate::material::Lambertian::new(checker.clone())),
+            Lambertian::new(checker.clone()),
         )),
         Box::new(Sphere::new(
             &Vector3::new(0.0, 10.0, 0.0),
             10.0,
-            Box::new(crate::material::Lambertian::new(checker)),
+            Lambertian::new(checker),
         )),
     ]
 }
 
-pub fn two_perlin_sphere() -> Vec<Box<Hittable>> {
-    let noise = NoiseTexture::new(10.0);
+pub fn two_perlin_sphere(nx: u32, ny: u32) -> (Vec<Box<Hittable>>, Camera) {
+    (
+        {
+            let noise = NoiseTexture::new(10.0);
 
-    vec![
-        Box::new(Sphere::new(
-            &Vector3::new(0.0, -1000.0, 0.0),
-            1000.0,
-            Box::new(Lambertian::new(noise.clone())),
-        )),
-        Box::new(Sphere::new(
-            &Vector3::new(0.0, 2.0, 0.0),
-            2.0,
-            Box::new(Lambertian::new(noise)),
-        )),
-    ]
+            vec![
+                Box::new(Sphere::new(
+                    &Vector3::new(0.0, -1000.0, 0.0),
+                    1000.0,
+                    Lambertian::new(noise.clone()),
+                )),
+                Box::new(Sphere::new(
+                    &Vector3::new(0.0, 2.0, 0.0),
+                    2.0,
+                    Lambertian::new(noise),
+                )),
+            ]
+        },
+        {
+            let look_from = Vector3::new(13.0, 2.0, 3.0);
+            let look_at = Vector3::new(0.0, 0.0, 0.0);
+            let focus_dist = 10.0;
+            let aperture = 0.0;
+
+            Camera::new(
+                &look_from,
+                &look_at,
+                &Vector3::new(0.0, 1.0, 0.0),
+                20.0,
+                nx as f32 / ny as f32,
+                aperture,
+                focus_dist,
+                0.0,
+                1.0,
+            )
+        },
+    )
 }
 
 pub fn earth() -> (Vec<Box<Hittable>>, Camera) {
@@ -133,9 +155,7 @@ pub fn earth() -> (Vec<Box<Hittable>>, Camera) {
         vec![Box::new(Sphere::new(
             &Vector3::new(0.0, 0.0, 0.0),
             1.0,
-            Box::new(material::Lambertian::new(ImageTexture::open(
-                "resource/earth.jpg",
-            ))),
+            Lambertian::new(ImageTexture::open("resource/earth.jpg")),
         ))],
         Camera::new(
             &Vector3::new(0.0, 0.0, 10.0),
@@ -156,10 +176,49 @@ pub fn earth_other_half() -> (Vec<Box<Hittable>>, Camera) {
         vec![Box::new(Sphere::new(
             &Vector3::new(0.0, 0.0, 0.0),
             1.0,
-            Box::new(material::Lambertian::new(ImageTexture::open(
-                "resource/earth.jpg",
-            ))),
+            Lambertian::new(ImageTexture::open("resource/earth.jpg")),
         ))],
+        Camera::new(
+            &Vector3::new(0.0, 0.0, -10.0),
+            &Vector3::zero(),
+            &Vector3::up(),
+            2.0 * f32::atan(1.2 / 10.0) * 180.0 / f32::consts::PI,
+            1200.0 / 800.0,
+            0.0,
+            10.0,
+            0.0,
+            0.0,
+        ),
+    )
+}
+
+pub fn simple_light() -> (Vec<Box<Hittable>>, Camera) {
+    (
+        {
+            let noise = Arc::new(NoiseTexture::new(4.0));
+            let mut obj_list: Vec<Box<Hittable>> = Vec::with_capacity(4);
+            obj_list.push(Box::new(Sphere::new(
+                &Vector3::new(0.0, -1000.0, 0.0),
+                1000.0,
+                Lambertian::new::<NoiseTexture, Arc<NoiseTexture>>(noise.clone()),
+            )));
+            obj_list.push(Box::new(Sphere::new(
+                &Vector3::new(0.0, -1000.0, 0.0),
+                1000.0,
+                Lambertian::new::<NoiseTexture, Arc<NoiseTexture>>(noise.clone()),
+            )));
+            obj_list.push(Box::new(Sphere::new(
+                &Vector3::new(0.0, -1000.0, 0.0),
+                1000.0,
+                Lambertian::new::<NoiseTexture, Arc<NoiseTexture>>(noise.clone()),
+            )));
+            obj_list.push(Box::new(Sphere::new(
+                &Vector3::new(0.0, -1000.0, 0.0),
+                1000.0,
+                Lambertian::new::<NoiseTexture, Arc<NoiseTexture>>(noise),
+            )));
+            obj_list
+        },
         Camera::new(
             &Vector3::new(0.0, 0.0, -10.0),
             &Vector3::zero(),

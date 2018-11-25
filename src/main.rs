@@ -4,11 +4,12 @@ extern crate rand;
 extern crate ray_tracing;
 extern crate thread_pool;
 
-use ray_tracing::*;
 use std::f32;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::time;
+
+use ray_tracing::*;
 
 fn main() {
     let nx = 1200;
@@ -17,25 +18,6 @@ fn main() {
     println!("P3\n{} {}\n255", nx, ny);
 
     let start_time = time::Instant::now();
-    //    let world = Arc::new(scenes::two_perlin_sphere());
-    //
-    //    let look_from = Vector3::new(13.0, 2.0, 3.0);
-    //    let look_at = Vector3::new(0.0, 0.0, 0.0);
-    //    let focus_dist = 10.0;
-    //    let aperture = 0.0;
-
-    //    let camera = Arc::new(Camera::new(
-    //        &look_from,
-    //        &look_at,
-    //        &Vector3::new(0.0, 1.0, 0.0),
-    //        20.0,
-    //        nx as f32 / ny as f32,
-    //        aperture,
-    //        focus_dist,
-    //        0.0,
-    //        1.0,
-    //    ));
-
     let (world, camera) = scenes::earth_other_half();
     let (world, camera) = (Arc::new(world), Arc::new(camera));
 
@@ -76,26 +58,16 @@ fn main() {
 
 fn render(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3 {
     // limit min to 0.001 to solve shadow acne problem
-    let mut hit_record = HitRecord::default();
-    if hit_list.hit(r, 0.001, f32::MAX, &mut hit_record) {
-        let mut attenuation = Vector3::default();
-        let mut scattered = Ray::default();
-        let emitted =
-            hit_record
-                .material
-                .unwrap()
-                .emitted(hit_record.u, hit_record.v, &hit_record.position);
-        if depth < 50
-            && hit_record.material.unwrap().scatter(
-                r,
-                &hit_record,
-                &mut attenuation,
-                &mut scattered,
-            ) {
-            return emitted + &attenuation * &render(&scattered, hit_list, depth + 1);
-        } else {
-            emitted
+    if let Some(hit_record) = hit_list.hit(r, 0.001, f32::MAX) {
+        let emitted = hit_record
+            .material
+            .emitted(hit_record.u, hit_record.v, &hit_record.position);
+        if depth < 50 {
+            if let Some((attenuation, scattered)) = hit_record.material.scatter(r, &hit_record) {
+                return emitted + &attenuation * &render(&scattered, hit_list, depth + 1);
+            }
         }
+        emitted
     } else {
         Vector3::zero()
     }

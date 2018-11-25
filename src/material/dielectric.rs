@@ -17,36 +17,31 @@ fn schlick(cosine: f32, ref_idx: f32) -> f32 {
 }
 
 impl Material for Dielectric {
-    fn scatter<'a>(
-        &self,
-        ray_in: &Ray,
-        hit_record: &HitRecord<'a>,
-        attenuation: &mut Vector3,
-        scattered: &mut Ray,
-    ) -> bool {
+    fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Vector3, Ray)> {
         let dt = hit_record.normal.dot(ray_in.direction());
         let (out_normal, ni_over_nt) = if dt > 0.0 {
             (-&hit_record.normal, self.ref_idx)
         } else {
             (hit_record.normal, 1_f32 / self.ref_idx)
         };
-        *attenuation = Vector3::new(1.0, 1.0, 1.0);
-        *scattered = Ray::new(
-            &hit_record.position,
-            &match ray_in.direction().refract(&out_normal, ni_over_nt) {
-                Some(refracted)
-                    if Random::gen::<f32>()
-                        >= schlick(
-                            if dt > 0.0 { self.ref_idx * dt } else { -dt },
-                            self.ref_idx,
-                        ) =>
-                {
-                    refracted
-                }
-                _ => ray_in.direction().reflect(&out_normal),
-            },
-            ray_in.time(),
-        );
-        true
+        Some((
+            Vector3::new(1.0, 1.0, 1.0),
+            Ray::new(
+                &hit_record.position,
+                &match ray_in.direction().refract(&out_normal, ni_over_nt) {
+                    Some(refracted)
+                        if Random::gen::<f32>()
+                            >= schlick(
+                                if dt > 0.0 { self.ref_idx * dt } else { -dt },
+                                self.ref_idx,
+                            ) =>
+                    {
+                        refracted
+                    }
+                    _ => ray_in.direction().reflect(&out_normal),
+                },
+                ray_in.time(),
+            ),
+        ))
     }
 }

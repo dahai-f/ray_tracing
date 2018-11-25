@@ -6,7 +6,7 @@ use std::fmt::Error;
 use std::fmt::Formatter;
 use std::ops::*;
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone)]
 pub struct Vector3([f32; 3]);
 
 impl Vector3 {

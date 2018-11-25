@@ -1,17 +1,23 @@
+use std::sync::Arc;
+
 use crate::*;
 
 pub struct Sphere {
     center: Vector3,
     radius: f32,
-    material: Box<Material>,
+    material: Arc<Material>,
 }
 
 impl Sphere {
-    pub fn new(center: &Vector3, radius: f32, material: Box<Material>) -> Sphere {
+    pub fn new<T: Material + 'static, U: Into<Arc<T>>>(
+        center: &Vector3,
+        radius: f32,
+        material: U,
+    ) -> Sphere {
         Sphere {
             center: *center,
             radius,
-            material,
+            material: material.into(),
         }
     }
 
@@ -29,13 +35,7 @@ unsafe impl Send for Sphere {}
 unsafe impl Sync for Sphere {}
 
 impl Hittable for Sphere {
-    fn hit<'a, 'b: 'a>(
-        &'b self,
-        ray: &Ray,
-        t_min: f32,
-        t_max: f32,
-        hit_record: &mut HitRecord<'a>,
-    ) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let co = ray.origin() - &self.center; // center to origin
         let a = ray.direction().dot(ray.direction());
         let b = 2.0 * ray.direction().dot(&co);
@@ -64,23 +64,21 @@ impl Hittable for Sphere {
                 let position = ray.point_at(t);
                 let normal = &(&position - &self.center) / self.radius;
                 let (u, v) = common::get_sphere_uv(&normal);
-                *hit_record = HitRecord {
+                Some(HitRecord {
                     t,
                     position,
                     normal,
-                    material: Some(&self.material),
+                    material: self.material.clone(),
                     u,
                     v,
-                };
-                true
+                })
             }
-            None => false,
+            None => None,
         }
     }
 
-    fn bounding_box(&self, _t0: f32, _t1: f32, aabb: &mut AABB) -> bool {
+    fn bounding_box(&self, _t0: f32, _t1: f32) -> Option<AABB> {
         let half = Vector3::new(self.radius, self.radius, self.radius);
-        *aabb = AABB::new(self.center - half, self.center + half);
-        true
+        Some(AABB::new(self.center - half, self.center + half))
     }
 }

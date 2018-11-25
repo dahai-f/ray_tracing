@@ -1,3 +1,6 @@
+use std::cmp::Ordering;
+
+use crate::Ray;
 use crate::*;
 
 pub struct Metal {
@@ -15,21 +18,19 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter<'a>(
-        &self,
-        ray_in: &Ray,
-        hit_record: &HitRecord<'a>,
-        attenuation: &mut Vector3,
-        scattered: &mut Ray,
-    ) -> bool {
-        *attenuation = self.albedo;
-        *scattered = Ray::new(
-            &hit_record.position,
-            &(&ray_in.direction().reflect(&hit_record.normal)
-                + &(self.fuzz * &Random::gen::<Vector3>()))
-                .normalized(),
-            ray_in.time(),
-        );
-        scattered.direction().dot(&hit_record.normal) > 0.0
+    fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Vector3, Ray)> {
+        let direction = &(&ray_in.direction().reflect(&hit_record.normal)
+            + &(self.fuzz * &Random::gen::<Vector3>()))
+            .normalized();
+        match direction.dot(&hit_record.normal).partial_cmp(&0.0f32) {
+            None => None,
+            Some(ordering) => match ordering {
+                Ordering::Greater => Some((
+                    self.albedo,
+                    Ray::new(&hit_record.position, direction, ray_in.time()),
+                )),
+                _ => None,
+            },
+        }
     }
 }

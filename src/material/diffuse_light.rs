@@ -6,14 +6,8 @@ pub struct DiffuseLight {
 }
 
 impl Material for DiffuseLight {
-    fn scatter<'a>(
-        &self,
-        _ray_in: &Ray,
-        _hit_record: &HitRecord<'a>,
-        _attenuation: &mut Vector3,
-        _scattered: &mut Ray,
-    ) -> bool {
-        false
+    fn scatter(&self, _ray_in: &Ray, _hit_record: &HitRecord) -> Option<(Vector3, Ray)> {
+        None
     }
 
     fn emitted(&self, u: f32, v: f32, position: &Vector3) -> Vector3 {

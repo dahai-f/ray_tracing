@@ -32,7 +32,7 @@ impl Perlin {
 
         let (i, j, k) = (i as usize, j as usize, k as usize);
 
-        let mut c = [[[Vector3::default(); 2]; 2]; 2];
+        let mut c = [[[Vector3::zero(); 2]; 2]; 2];
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
@@ -81,7 +81,7 @@ fn perlin_interp(c: &[[[Vector3; 2]; 2]; 2], u: f32, v: f32, w: f32) -> f32 {
 
 fn perlin_generate() -> [Vector3; 256] {
     Random::with_rng(|rng| {
-        let mut result = [Vector3::default(); 256];
+        let mut result = [Vector3::zero(); 256];
         for i in 0..256 {
             result[i] = rng.gen::<Vector3>().normalized();
         }

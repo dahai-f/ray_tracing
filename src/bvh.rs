@@ -1,6 +1,7 @@
-use crate::*;
 use std::cmp::Ordering;
 use std::sync::Arc;
+
+use crate::*;
 
 pub struct BvhNode {
     aabb: AABB,
@@ -24,11 +25,8 @@ impl BvhNode {
 
         let axis = Random::gen::<usize>() % 3;
         hittable_list.sort_by(|a, b| {
-            let mut a_box = AABB::default();
-            let mut b_box = AABB::default();
-            if !a.bounding_box(t0, t1, &mut a_box) || !b.bounding_box(t0, t1, &mut b_box) {
-                panic!("no bounding box");
-            }
+            let a_box = a.bounding_box(t0, t1).unwrap();
+            let b_box = b.bounding_box(t0, t1).unwrap();
             if a_box.min()[axis] < b_box.min()[axis] {
                 Ordering::Less
             } else {
@@ -54,14 +52,8 @@ impl BvhNode {
             }
         };
 
-        let mut left_box = AABB::default();
-        let mut right_box = AABB::default();
-        if !left_child.bounding_box(t0, t1, &mut left_box)
-            || !right_child.bounding_box(t0, t1, &mut right_box)
-        {
-            panic!("no bounding box");
-        }
-
+        let left_box = left_child.bounding_box(t0, t1).unwrap();
+        let right_box = right_child.bounding_box(t0, t1).unwrap();
         BvhNode::new(left_box.surrounding(&right_box), left_child, right_child)
     }
 }
@@ -69,41 +61,29 @@ impl BvhNode {
 unsafe impl Send for BvhNode {}
 
 impl Hittable for BvhNode {
-    fn hit<'a, 'b: 'a>(
-        &'b self,
-        ray: &Ray,
-        t_min: f32,
-        t_max: f32,
-        hit_record: &mut HitRecord<'a>,
-    ) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         if !self.aabb.hit(ray, t_min, t_max) {
-            return false;
+            return None;
         }
 
-        let mut left_record = HitRecord::default();
-        let mut right_record = HitRecord::default();
-        let left_hit = self.left_child.hit(ray, t_min, t_max, &mut left_record);
-        let right_hit = self.left_child.hit(ray, t_min, t_max, &mut right_record);
-        if left_hit && right_hit {
-            *hit_record = if left_record.t <= right_record.t {
-                left_record
-            } else {
-                right_record
-            };
-            return true;
-        } else if left_hit {
-            *hit_record = left_record;
-            return true;
-        } else if right_hit {
-            *hit_record = right_record;
-            return true;
+        match (
+            self.left_child.hit(ray, t_min, t_max),
+            self.left_child.hit(ray, t_min, t_max),
+        ) {
+            (Some(left_record), Some(right_record)) => {
+                if left_record.t <= right_record.t {
+                    Some(left_record)
+                } else {
+                    Some(right_record)
+                }
+            }
+            (Some(left_record), None) => Some(left_record),
+            (None, Some(right_record)) => Some(right_record),
+            (None, None) => None,
         }
-
-        false
     }
 
-    fn bounding_box(&self, _t0: f32, _t1: f32, aabb: &mut AABB) -> bool {
-        *aabb = self.aabb;
-        true
+    fn bounding_box(&self, _t0: f32, _t1: f32) -> Option<AABB> {
+        Some(self.aabb)
     }
 }

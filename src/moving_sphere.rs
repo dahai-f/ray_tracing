@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::*;
 
 pub struct MovingSphere {
@@ -6,17 +8,17 @@ pub struct MovingSphere {
     time0: f32,
     time1: f32,
     radius: f32,
-    material: Box<Material>,
+    material: Arc<Material>,
 }
 
 impl MovingSphere {
-    pub fn new(
+    pub fn new<T: Material + 'static, U: Into<Arc<T>>>(
         center0: &Vector3,
         center1: &Vector3,
         time0: f32,
         time1: f32,
         radius: f32,
-        material: Box<Material>,
+        material: U,
     ) -> MovingSphere {
         MovingSphere {
             center0: *center0,
@@ -24,7 +26,7 @@ impl MovingSphere {
             time0,
             time1,
             radius,
-            material,
+            material: material.into(),
         }
     }
 
@@ -39,13 +41,7 @@ unsafe impl Sync for MovingSphere {}
 unsafe impl Send for MovingSphere {}
 
 impl Hittable for MovingSphere {
-    fn hit<'a, 'b: 'a>(
-        &'b self,
-        ray: &Ray,
-        t_min: f32,
-        t_max: f32,
-        hit_record: &mut HitRecord<'a>,
-    ) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let center = self.center(ray.time());
         let co = ray.origin() - center;
         let a = ray.direction().dot(ray.direction());
@@ -53,7 +49,7 @@ impl Hittable for MovingSphere {
         let c = co.dot(&co) - self.radius * self.radius;
         let discriminant = b * b - 4.0 * a * c;
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
 
         let t = (|| {
@@ -69,23 +65,28 @@ impl Hittable for MovingSphere {
         })();
         match t {
             Some(t) => {
-                hit_record.position = ray.point_at(t);
-                hit_record.normal = &(&hit_record.position - &center) / self.radius;
-                hit_record.t = t;
-                hit_record.material = Some(&self.material);
-                true
+                let point = ray.point_at(t);
+                let normal = &(&point - &center) / self.radius;
+                let (u, v) = common::get_sphere_uv(&normal);
+                Some(HitRecord {
+                    t,
+                    position: ray.point_at(t),
+                    normal,
+                    material: self.material.clone(),
+                    u,
+                    v,
+                })
             }
-            None => false,
+            None => None,
         }
     }
 
-    fn bounding_box(&self, t0: f32, t1: f32, aabb: &mut AABB) -> bool {
+    fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB> {
         let half = Vector3::new(self.radius, self.radius, self.radius);
         let center = self.center(t0);
         let aabb0 = AABB::new(center - half, center + half);
         let center = self.center(t1);
         let aabb1 = AABB::new(center - half, center + half);
-        *aabb = aabb0.surrounding(&aabb1);
-        true
+        Some(aabb0.surrounding(&aabb1))
     }
 }

@@ -1,7 +1,7 @@
-use core::mem;
 use crate::*;
+use core::mem;
 
-#[derive(Default, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct AABB {
     min: Vector3,
     max: Vector3,

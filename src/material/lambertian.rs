@@ -1,32 +1,30 @@
+use std::sync::Arc;
+
 use crate::texture::*;
 use crate::*;
 
-pub struct Lambertian<T: Texture> {
-    texture: T,
+pub struct Lambertian {
+    texture: Arc<Texture>,
 }
 
-impl<T: Texture> Lambertian<T> {
-    pub fn new(texture: T) -> Lambertian<T> {
-        Lambertian { texture }
+impl Lambertian {
+    pub fn new<T: Texture + 'static, U: Into<Arc<T>>>(texture: U) -> Lambertian {
+        Lambertian {
+            texture: texture.into(),
+        }
     }
 }
 
-impl<T: Texture> Material for Lambertian<T> {
-    fn scatter<'a>(
-        &self,
-        ray_in: &Ray,
-        hit_record: &HitRecord<'a>,
-        attenuation: &mut Vector3,
-        scattered: &mut Ray,
-    ) -> bool {
-        *scattered = Ray::new(
-            &hit_record.position,
-            &(&hit_record.normal + &Random::gen()).normalized(),
-            ray_in.time(),
-        );
-        *attenuation = self
-            .texture
-            .value(hit_record.u, hit_record.v, &hit_record.position);
-        true
+impl Material for Lambertian {
+    fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Vector3, Ray)> {
+        Some((
+            self.texture
+                .value(hit_record.u, hit_record.v, &hit_record.position),
+            Ray::new(
+                &hit_record.position,
+                &(&hit_record.normal + &Random::gen()).normalized(),
+                ray_in.time(),
+            ),
+        ))
     }
 }
