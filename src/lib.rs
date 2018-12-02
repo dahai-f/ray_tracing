@@ -11,6 +11,9 @@ pub use self::moving_sphere::MovingSphere;
 pub use self::random::Random;
 pub use self::ray::Ray;
 pub use self::ray_hit::{HitRecord, Hittable};
+pub use self::rect::XyRect;
+pub use self::rect::YzRect;
+pub use self::rect::ZxRect;
 pub use self::sphere::Sphere;
 pub use self::vector3::Vector3;
 

@@ -18,7 +18,7 @@ fn main() {
     println!("P3\n{} {}\n255", nx, ny);
 
     let start_time = time::Instant::now();
-    let (world, camera) = scenes::earth_other_half();
+    let (world, camera) = scenes::simple_light(1200, 800);
     let (world, camera) = (Arc::new(world), Arc::new(camera));
 
     let thread_pool = thread_pool::ThreadPool::new(12);
@@ -42,9 +42,9 @@ fn main() {
             }
             color /= ns as f32;
             color = Vector3::new(color.r().sqrt(), color.g().sqrt(), color.b().sqrt()); // square root to use gamma
-            let ir = (255.99_f32 * color.r()) as i32;
-            let ig = (255.99_f32 * color.g()) as i32;
-            let ib = (255.99_f32 * color.b()) as i32;
+            let ir = ((255.99_f32 * color.r()) as i32).min(255);
+            let ig = ((255.99_f32 * color.g()) as i32).min(255);
+            let ib = ((255.99_f32 * color.b()) as i32).min(255);
             println!("{} {} {}", ir, ig, ib);
         }
     }
@@ -70,5 +70,7 @@ fn render(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3 {
         emitted
     } else {
         Vector3::zero()
+        //        let t = 0.5 * (r.direction().y() + 1.0);
+        //        &((1.0 - t) * &Vector3::new(1.0, 1.0, 1.0)) + &(t * &Vector3::new(0.5, 0.7, 1.0))
     }
 }

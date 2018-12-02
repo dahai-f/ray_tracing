@@ -1,8 +1,16 @@
+use std::sync::Arc;
+
 use crate::texture::Texture;
 use crate::*;
 
 pub struct DiffuseLight {
-    emit: Box<Texture>,
+    emit: Arc<Texture>,
+}
+
+impl DiffuseLight {
+    pub fn new<T: Texture + 'static, U: Into<Arc<T>>>(emit: U) -> DiffuseLight {
+        DiffuseLight { emit: emit.into() }
+    }
 }
 
 impl Material for DiffuseLight {

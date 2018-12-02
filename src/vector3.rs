@@ -22,6 +22,9 @@ impl Vector3 {
     pub const fn forward() -> Vector3 {
         Vector3::new(0.0, 0.0, 1.0)
     }
+    pub const fn one() -> Vector3 {
+        Vector3::new(1.0, 1.0, 1.0)
+    }
 
     pub fn random_in_unit_disk() -> Vector3 {
         loop {
@@ -74,6 +77,10 @@ impl Vector3 {
 
     pub fn squared_length(&self) -> f32 {
         self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
+    }
+
+    pub fn distance(&self, other: &Vector3) -> f32 {
+        (self - other).length()
     }
 
     pub fn normalize(&mut self) {

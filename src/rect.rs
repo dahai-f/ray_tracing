@@ -21,7 +21,7 @@ macro_rules! vector3_yzx {
 }
 
 macro_rules! rect {
-    ($xy_rect:ident, $x:ident, $y:ident, $v3:ident) => {
+    ($xy_rect:ident, $x:ident, $y:ident, $z:ident, $v3:ident) => {
         pub struct $xy_rect {
             material: Arc<Material>,
             $x: (f32, f32),
@@ -30,11 +30,11 @@ macro_rules! rect {
         }
 
         impl $xy_rect {
-            pub fn new<T: Into<Arc<Material>>>(
+            pub fn new<T: Material + 'static, U: Into<Arc<T>>>(
                 $x: (f32, f32),
                 $y: (f32, f32),
                 k: f32,
-                material: T,
+                material: U,
             ) -> $xy_rect {
                 $xy_rect {
                     material: material.into(),
@@ -51,7 +51,7 @@ macro_rules! rect {
 
         impl Hittable for $xy_rect {
             fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-                let t = (self.k - ray.origin().z()) / ray.direction().z();
+                let t = (self.k - ray.origin().$z()) / ray.direction().$z();
                 if t < t_min || t > t_max {
                     return None;
                 }
@@ -86,6 +86,6 @@ macro_rules! rect {
     };
 }
 
-rect!(XyRect, x, y, vector3_xyz);
-rect!(YzRect, y, z, vector3_yzx);
-rect!(ZxRect, z, x, vector3_zxy);
+rect!(XyRect, x, y, z, vector3_xyz);
+rect!(YzRect, y, z, x, vector3_yzx);
+rect!(ZxRect, z, x, y, vector3_zxy);
