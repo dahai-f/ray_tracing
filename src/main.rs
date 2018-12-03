@@ -18,7 +18,7 @@ fn main() {
     println!("P3\n{} {}\n255", nx, ny);
 
     let start_time = time::Instant::now();
-    let (world, camera) = scenes::simple_light(1200, 800);
+    let (world, camera) = scenes::cornell_box(1200, 800);
     let (world, camera) = (Arc::new(world), Arc::new(camera));
 
     let thread_pool = thread_pool::ThreadPool::new(12);

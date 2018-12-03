@@ -261,3 +261,62 @@ pub fn simple_light(nx: i32, ny: i32) -> (Vec<Box<Hittable>>, Camera) {
         },
     )
 }
+
+pub fn cornell_box(nx: i32, ny: i32) -> (Vec<Box<Hittable>>, Camera) {
+    (
+        {
+            let red_material = Lambertian::new(ConstantTexture::new(0.65, 0.05, 0.05));
+            let white_material = Arc::new(Lambertian::new(ConstantTexture::new(0.73, 0.73, 0.73)));
+            let green_material = Lambertian::new(ConstantTexture::new(0.12, 0.45, 0.15));
+            let light_material = DiffuseLight::new(ConstantTexture::new(15.0, 15.0, 15.0));
+
+            let mut list: Vec<Box<Hittable>> = Vec::with_capacity(5);
+            list.push(Box::new(YzRect::new(
+                (0.0, 555.0),
+                (0.0, 555.0),
+                555.0,
+                green_material,
+            )));
+            list.push(Box::new(YzRect::new(
+                (0.0, 555.0),
+                (0.0, 555.0),
+                0.0,
+                red_material,
+            )));
+            list.push(Box::new(ZxRect::new(
+                (213.0, 343.0),
+                (227.0, 332.0),
+                554.0,
+                light_material,
+            )));
+            list.push(Box::new(ZxRect::new::<Lambertian, Arc<Lambertian>>(
+                (0.0, 555.0),
+                (0.0, 555.0),
+                0.0,
+                white_material.clone(),
+            )));
+            list.push(Box::new(XyRect::new::<Lambertian, Arc<Lambertian>>(
+                (0.0, 555.0),
+                (0.0, 555.0),
+                555.0,
+                white_material,
+            )));
+            list
+        },
+        {
+            let look_from = Vector3::new(278.0, 278.0, -800.0);
+            let look_at = Vector3::new(278.0, 278.0, 0.0);
+            Camera::new(
+                &look_from,
+                &look_at,
+                &Vector3::up(),
+                40.0,
+                nx as f32 / ny as f32,
+                0.0,
+                10.0,
+                0.0,
+                1.0,
+            )
+        },
+    )
+}
