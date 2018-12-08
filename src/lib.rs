@@ -16,6 +16,7 @@ pub use self::rect::YzRect;
 pub use self::rect::ZxRect;
 pub use self::sphere::Sphere;
 pub use self::vector3::Vector3;
+pub use self::flip_normals::FlipNormals;
 
 mod aabb;
 mod bvh;
@@ -32,3 +33,4 @@ pub mod scenes;
 mod sphere;
 pub mod texture;
 mod vector3;
+mod flip_normals;

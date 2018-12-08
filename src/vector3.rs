@@ -1,10 +1,12 @@
-use crate::*;
-use rand::distributions::Standard;
-use rand::prelude::*;
 use std::fmt::Display;
 use std::fmt::Error;
 use std::fmt::Formatter;
 use std::ops::*;
+
+use rand::distributions::Standard;
+use rand::prelude::*;
+
+use crate::*;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vector3([f32; 3]);
@@ -121,6 +123,14 @@ impl Vector3 {
 }
 
 unsafe impl std::marker::Send for Vector3 {}
+
+impl Neg for Vector3 {
+    type Output = Vector3;
+
+    fn neg(self) -> Vector3 {
+        Vector3::new(-self.x(), -self.y(), -self.z())
+    }
+}
 
 impl Add for &Vector3 {
     type Output = Vector3;

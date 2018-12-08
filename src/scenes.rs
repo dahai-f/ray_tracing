@@ -3,9 +3,9 @@ use std::sync::Arc;
 
 use rand::prelude::*;
 
+use crate::*;
 use crate::material::*;
 use crate::texture::*;
-use crate::*;
 
 pub fn random(nx: i32, ny: i32) -> (Vec<Box<Hittable>>, Camera) {
     (
@@ -239,7 +239,7 @@ pub fn simple_light(nx: i32, ny: i32) -> (Vec<Box<Hittable>>, Camera) {
                 (3.0, 5.0),
                 (1.0, 3.0),
                 -2.0,
-                light.clone(),
+                light.clone() as Arc<DiffuseLight>,
             )));
             obj_list
         },
@@ -271,12 +271,12 @@ pub fn cornell_box(nx: i32, ny: i32) -> (Vec<Box<Hittable>>, Camera) {
             let light_material = DiffuseLight::new(ConstantTexture::new(15.0, 15.0, 15.0));
 
             let mut list: Vec<Box<Hittable>> = Vec::with_capacity(5);
-            list.push(Box::new(YzRect::new(
+            list.push(Box::new(FlipNormals::new(YzRect::new(
                 (0.0, 555.0),
                 (0.0, 555.0),
                 555.0,
                 green_material,
-            )));
+            ))));
             list.push(Box::new(YzRect::new(
                 (0.0, 555.0),
                 (0.0, 555.0),
@@ -284,23 +284,29 @@ pub fn cornell_box(nx: i32, ny: i32) -> (Vec<Box<Hittable>>, Camera) {
                 red_material,
             )));
             list.push(Box::new(ZxRect::new(
-                (213.0, 343.0),
                 (227.0, 332.0),
+                (213.0, 343.0),
                 554.0,
                 light_material,
             )));
+            list.push(Box::new(FlipNormals::new(ZxRect::new::<Lambertian, Arc<Lambertian>>(
+                (0.0, 555.0),
+                (0.0, 555.0),
+                555.0,
+                white_material.clone(),
+            ))));
             list.push(Box::new(ZxRect::new::<Lambertian, Arc<Lambertian>>(
                 (0.0, 555.0),
                 (0.0, 555.0),
                 0.0,
                 white_material.clone(),
             )));
-            list.push(Box::new(XyRect::new::<Lambertian, Arc<Lambertian>>(
+            list.push(Box::new(FlipNormals::new(XyRect::new::<Lambertian, Arc<Lambertian>>(
                 (0.0, 555.0),
                 (0.0, 555.0),
                 555.0,
                 white_material,
-            )));
+            ))));
             list
         },
         {
