@@ -7,5 +7,5 @@ edition = "2018"
 [dependencies]
 rand = "*"
 lazy_static = "*"
-thread_pool = {path="../thread_pool"}
+thread_pool = { git = "https://github.com/dahai-f/thread_pool.git" }
 image = "*"
