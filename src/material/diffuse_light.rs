@@ -4,7 +4,7 @@ use crate::texture::Texture;
 use crate::*;
 
 pub struct DiffuseLight {
-    emit: Arc<Texture>,
+    emit: Arc<dyn Texture>,
 }
 
 impl DiffuseLight {

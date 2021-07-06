@@ -5,12 +5,12 @@ use crate::*;
 
 pub struct BvhNode {
     aabb: AABB,
-    left_child: Arc<Hittable>,
-    right_child: Arc<Hittable>,
+    left_child: Arc<dyn Hittable>,
+    right_child: Arc<dyn Hittable>,
 }
 
 impl BvhNode {
-    fn new(aabb: AABB, left_child: Arc<Hittable>, right_child: Arc<Hittable>) -> BvhNode {
+    fn new(aabb: AABB, left_child: Arc<dyn Hittable>, right_child: Arc<dyn Hittable>) -> BvhNode {
         BvhNode {
             aabb,
             left_child,
@@ -18,8 +18,8 @@ impl BvhNode {
         }
     }
 
-    pub fn from_hit_list(hittable_list: &mut [Arc<Hittable>], t0: f32, t1: f32) -> BvhNode {
-        if hittable_list.len() == 0 {
+    pub fn from_hit_list(hittable_list: &mut [Arc<dyn Hittable>], t0: f32, t1: f32) -> BvhNode {
+        if hittable_list.is_empty() {
             panic!("no hit list");
         }
 
@@ -34,7 +34,7 @@ impl BvhNode {
             }
         });
 
-        let (left_child, right_child): (Arc<Hittable>, Arc<Hittable>) = {
+        let (left_child, right_child): (Arc<dyn Hittable>, Arc<dyn Hittable>) = {
             if hittable_list.len() == 1 {
                 (hittable_list[0].clone(), hittable_list[0].clone())
             } else if hittable_list.len() == 2 {

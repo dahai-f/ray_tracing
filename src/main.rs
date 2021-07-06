@@ -1,5 +1,3 @@
-#![feature(duration_float)]
-
 extern crate rand;
 extern crate ray_tracing;
 extern crate thread_pool;
@@ -21,7 +19,7 @@ fn main() {
     let (world, camera) = scenes::cornell_box(1200, 800);
     let (world, camera) = (Arc::new(world), Arc::new(camera));
 
-    let thread_pool = thread_pool::ThreadPool::new(12);
+    let mut thread_pool = thread_pool::ThreadPool::new(12);
     let (color_sender, color_receiver) = mpsc::channel();
     for j in (0..ny).rev() {
         for i in 0..nx {
@@ -52,11 +50,11 @@ fn main() {
     let after_ray_tracing = time::Instant::now();
     eprintln!(
         "ray tracing duration: {}s",
-        (after_ray_tracing - start_time).as_float_secs()
+        (after_ray_tracing - start_time).as_secs_f64()
     );
 }
 
-fn render(r: &Ray, hit_list: &[Box<Hittable>], depth: u32) -> Vector3 {
+fn render(r: &Ray, hit_list: &[Box<dyn Hittable>], depth: u32) -> Vector3 {
     // limit min to 0.001 to solve shadow acne problem
     if let Some(hit_record) = hit_list.hit(r, 0.001, f32::MAX) {
         let emitted = hit_record

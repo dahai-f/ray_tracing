@@ -6,7 +6,7 @@ pub struct HitRecord {
     pub t: f32,
     pub position: Vector3,
     pub normal: Vector3,
-    pub material: Arc<Material>,
+    pub material: Arc<dyn Material>,
     pub u: f32,
     pub v: f32,
 }
@@ -17,7 +17,7 @@ pub trait Hittable: Sync + Send {
     fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB>;
 }
 
-impl Hittable for &[Box<Hittable>] {
+impl Hittable for &[Box<dyn Hittable>] {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let mut result = None;
         let mut closest_so_far = t_max;
@@ -31,11 +31,11 @@ impl Hittable for &[Box<Hittable>] {
     }
 
     fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB> {
-        if self.len() < 1 {
+        if self.is_empty() {
             return None;
         }
 
-        self[0].bounding_box(t0, t1).map_or(None, |mut result| {
+        self[0].bounding_box(t0, t1).and_then(|mut result| {
             for i in 1..self.len() {
                 match self[i].bounding_box(t0, t1) {
                     Some(aabb) => {

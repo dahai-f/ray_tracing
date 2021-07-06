@@ -8,7 +8,7 @@ pub struct MovingSphere {
     time0: f32,
     time1: f32,
     radius: f32,
-    material: Arc<Material>,
+    material: Arc<dyn Material>,
 }
 
 impl MovingSphere {
@@ -66,7 +66,7 @@ impl Hittable for MovingSphere {
         match t {
             Some(t) => {
                 let point = ray.point_at(t);
-                let normal = &(&point - &center) / self.radius;
+                let normal = &(point - center) / self.radius;
                 let (u, v) = common::get_sphere_uv(&normal);
                 Some(HitRecord {
                     t,

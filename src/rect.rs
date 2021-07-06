@@ -23,7 +23,7 @@ macro_rules! vector3_yzx {
 macro_rules! rect {
     ($xy_rect:ident, $x:ident, $y:ident, $z:ident, $v3:ident) => {
         pub struct $xy_rect {
-            material: Arc<Material>,
+            material: Arc<dyn Material>,
             $x: (f32, f32),
             $y: (f32, f32),
             k: f32,

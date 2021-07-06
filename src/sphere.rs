@@ -5,7 +5,7 @@ use crate::*;
 pub struct Sphere {
     center: Vector3,
     radius: f32,
-    material: Arc<Material>,
+    material: Arc<dyn Material>,
 }
 
 impl Sphere {
@@ -36,7 +36,7 @@ unsafe impl Sync for Sphere {}
 
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-        let co = ray.origin() - &self.center; // center to origin
+        let co = ray.origin() - self.center; // center to origin
         let a = ray.direction().dot(ray.direction());
         let b = 2.0 * ray.direction().dot(&co);
         let c = co.dot(&co) - self.radius * self.radius;
@@ -62,7 +62,7 @@ impl Hittable for Sphere {
         match t {
             Some(t) => {
                 let position = ray.point_at(t);
-                let normal = &(&position - &self.center) / self.radius;
+                let normal = &(position - self.center) / self.radius;
                 let (u, v) = common::get_sphere_uv(&normal);
                 Some(HitRecord {
                     t,

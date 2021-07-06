@@ -4,7 +4,7 @@ use crate::texture::*;
 use crate::*;
 
 pub struct Lambertian {
-    texture: Arc<Texture>,
+    texture: Arc<dyn Texture>,
 }
 
 impl Lambertian {
@@ -22,7 +22,7 @@ impl Material for Lambertian {
                 .value(hit_record.u, hit_record.v, &hit_record.position),
             Ray::new(
                 &hit_record.position,
-                &(&hit_record.normal + &Random::gen()).normalized(),
+                &(hit_record.normal + Random::gen()).normalized(),
                 ray_in.time(),
             ),
         ))
