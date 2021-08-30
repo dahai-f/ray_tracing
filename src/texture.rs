@@ -4,7 +4,7 @@ use image::*;
 
 use crate::*;
 
-pub trait Texture {
+pub trait Texture: Sync + Send {
     fn value(&self, u: f32, v: f32, position: &Vector3) -> Vector3;
 }
 

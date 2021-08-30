@@ -122,8 +122,6 @@ impl Vector3 {
     }
 }
 
-unsafe impl std::marker::Send for Vector3 {}
-
 impl Neg for Vector3 {
     type Output = Vector3;
 

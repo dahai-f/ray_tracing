@@ -5,7 +5,7 @@ pub use self::diffuse_light::DiffuseLight;
 pub use self::lambertian::Lambertian;
 pub use self::metal::Metal;
 
-pub trait Material {
+pub trait Material: Send + Sync {
     /// scatter a ray, and return (attenuation, scattered_ray)
     fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Vector3, Ray)>;
 

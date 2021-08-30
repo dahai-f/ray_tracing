@@ -36,10 +36,6 @@ impl MovingSphere {
     }
 }
 
-unsafe impl Sync for MovingSphere {}
-
-unsafe impl Send for MovingSphere {}
-
 impl Hittable for MovingSphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let center = self.center(ray.time());
@@ -81,11 +77,11 @@ impl Hittable for MovingSphere {
         }
     }
 
-    fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB> {
+    fn bounding_box(&self) -> Option<AABB> {
         let half = Vector3::new(self.radius, self.radius, self.radius);
-        let center = self.center(t0);
+        let center = self.center(0.0);
         let aabb0 = AABB::new(center - half, center + half);
-        let center = self.center(t1);
+        let center = self.center(1.0);
         let aabb1 = AABB::new(center - half, center + half);
         Some(aabb0.surrounding(&aabb1))
     }

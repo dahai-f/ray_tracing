@@ -6,6 +6,7 @@ use std::sync::mpsc;
 use std::sync::Arc;
 use std::time;
 
+use ray_tracing::bvh::BvhNode;
 use ray_tracing::*;
 
 fn main() {
@@ -15,22 +16,21 @@ fn main() {
     println!("P3\n{} {}\n255", nx, ny);
 
     let start_time = time::Instant::now();
-    let (world, camera) = scenes::cornell_box(1200, 800);
-    let (world, camera) = (Arc::new(world), Arc::new(camera));
+    let (mut world, camera) = scenes::cornell_box(1200, 800);
+    let camera = &camera;
 
     let mut thread_pool = thread_pool::ThreadPool::new(12);
     let (color_sender, color_receiver) = mpsc::channel();
+    let bvh_root = BvhNode::from_hit_list(&mut world);
     for j in (0..ny).rev() {
         for i in 0..nx {
             for _ in 0..ns {
-                let world = world.clone();
-                let camera = camera.clone();
                 let color_sender = color_sender.clone();
                 thread_pool.execute(move || {
                     let u = (i as f32 + Random::gen::<f32>()) / nx as f32;
                     let v = (j as f32 + Random::gen::<f32>()) / ny as f32;
                     let r = camera.get_ray(u, v);
-                    color_sender.send(render(&r, &*world, 0)).unwrap();
+                    color_sender.send(render(&r, &bvh_root, 0)).unwrap();
                 });
             }
             let mut color = Vector3::new(0.0, 0.0, 0.0);
@@ -53,15 +53,15 @@ fn main() {
     );
 }
 
-fn render(r: &Ray, hit_list: &[Box<dyn Hittable>], depth: u32) -> Vector3 {
+fn render(r: &Ray, bvh_root: &BvhNode, depth: u32) -> Vector3 {
     // limit min to 0.001 to solve shadow acne problem
-    if let Some(hit_record) = hit_list.hit(r, 0.001, f32::MAX) {
+    if let Some(hit_record) = bvh_root.hit(r, 0.001, f32::MAX) {
         let emitted = hit_record
             .material
             .emitted(hit_record.u, hit_record.v, &hit_record.position);
         if depth < 50 {
             if let Some((attenuation, scattered)) = hit_record.material.scatter(r, &hit_record) {
-                return emitted + &attenuation * &render(&scattered, hit_list, depth + 1);
+                return emitted + &attenuation * &render(&scattered, bvh_root, depth + 1);
             }
         }
         emitted

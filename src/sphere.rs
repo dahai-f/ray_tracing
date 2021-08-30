@@ -30,10 +30,6 @@ impl Sphere {
     }
 }
 
-unsafe impl Send for Sphere {}
-
-unsafe impl Sync for Sphere {}
-
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let co = ray.origin() - self.center; // center to origin
@@ -77,7 +73,7 @@ impl Hittable for Sphere {
         }
     }
 
-    fn bounding_box(&self, _t0: f32, _t1: f32) -> Option<AABB> {
+    fn bounding_box(&self) -> Option<AABB> {
         let half = Vector3::new(self.radius, self.radius, self.radius);
         Some(AABB::new(self.center - half, self.center + half))
     }

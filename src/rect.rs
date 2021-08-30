@@ -45,10 +45,6 @@ macro_rules! rect {
             }
         }
 
-        unsafe impl Send for $xy_rect {}
-
-        unsafe impl Sync for $xy_rect {}
-
         impl Hittable for $xy_rect {
             fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
                 let t = (self.k - ray.origin().$z()) / ray.direction().$z();
@@ -76,7 +72,7 @@ macro_rules! rect {
                 })
             }
 
-            fn bounding_box(&self, _t0: f32, _t1: f32) -> Option<AABB> {
+            fn bounding_box(&self) -> Option<AABB> {
                 Some(AABB::new(
                     $v3!(self.$x.0, self.$y.0, self.k - 0.00001),
                     $v3!(self.$x.1, self.$y.1, self.k + 0.00001),

@@ -18,15 +18,15 @@ impl BvhNode {
         }
     }
 
-    pub fn from_hit_list(hittable_list: &mut [Arc<dyn Hittable>], t0: f32, t1: f32) -> BvhNode {
+    pub fn from_hit_list(hittable_list: &mut [Arc<dyn Hittable>]) -> BvhNode {
         if hittable_list.is_empty() {
             panic!("no hit list");
         }
 
         let axis = Random::gen::<usize>() % 3;
         hittable_list.sort_by(|a, b| {
-            let a_box = a.bounding_box(t0, t1).unwrap();
-            let b_box = b.bounding_box(t0, t1).unwrap();
+            let a_box = a.bounding_box().unwrap();
+            let b_box = b.bounding_box().unwrap();
             if a_box.min()[axis] < b_box.min()[axis] {
                 Ordering::Less
             } else {
@@ -45,20 +45,18 @@ impl BvhNode {
                     if mid == 1 {
                         hittable_list[0].clone()
                     } else {
-                        Arc::new(BvhNode::from_hit_list(&mut hittable_list[..mid], t0, t1))
+                        Arc::new(BvhNode::from_hit_list(&mut hittable_list[..mid]))
                     },
-                    Arc::new(BvhNode::from_hit_list(&mut hittable_list[mid..], t0, t1)),
+                    Arc::new(BvhNode::from_hit_list(&mut hittable_list[mid..])),
                 )
             }
         };
 
-        let left_box = left_child.bounding_box(t0, t1).unwrap();
-        let right_box = right_child.bounding_box(t0, t1).unwrap();
+        let left_box = left_child.bounding_box().unwrap();
+        let right_box = right_child.bounding_box().unwrap();
         BvhNode::new(left_box.surrounding(&right_box), left_child, right_child)
     }
 }
-
-unsafe impl Send for BvhNode {}
 
 impl Hittable for BvhNode {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
@@ -83,7 +81,7 @@ impl Hittable for BvhNode {
         }
     }
 
-    fn bounding_box(&self, _t0: f32, _t1: f32) -> Option<AABB> {
+    fn bounding_box(&self) -> Option<AABB> {
         Some(self.aabb)
     }
 }

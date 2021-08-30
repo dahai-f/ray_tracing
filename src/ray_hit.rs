@@ -14,7 +14,7 @@ pub struct HitRecord {
 pub trait Hittable: Sync + Send {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
 
-    fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB>;
+    fn bounding_box(&self) -> Option<AABB>;
 }
 
 impl Hittable for &[Box<dyn Hittable>] {
@@ -30,14 +30,14 @@ impl Hittable for &[Box<dyn Hittable>] {
         result
     }
 
-    fn bounding_box(&self, t0: f32, t1: f32) -> Option<AABB> {
+    fn bounding_box(&self) -> Option<AABB> {
         if self.is_empty() {
             return None;
         }
 
-        self[0].bounding_box(t0, t1).and_then(|mut result| {
+        self[0].bounding_box().and_then(|mut result| {
             for i in 1..self.len() {
-                match self[i].bounding_box(t0, t1) {
+                match self[i].bounding_box() {
                     Some(aabb) => {
                         result = result.surrounding(&aabb);
                     }
