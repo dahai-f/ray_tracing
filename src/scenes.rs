@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use rand::prelude::*;
 
+use crate::camera::ViewInfo;
 use crate::material::*;
 use crate::texture::*;
 use crate::*;
@@ -102,10 +103,7 @@ pub fn random(nx: i32, ny: i32) -> (Vec<Box<dyn Hittable>>, Camera) {
                 &look_from,
                 &look_at,
                 &Vector3::new(0.0, 1.0, 0.0),
-                20.0,
-                nx as f32 / ny as f32,
-                aperture,
-                focus_dist,
+                &ViewInfo::new(20.0, nx as f32 / ny as f32, aperture, focus_dist),
                 0.0,
                 1.0,
             )
@@ -161,10 +159,7 @@ pub fn two_perlin_sphere(nx: u32, ny: u32) -> (Vec<Box<dyn Hittable>>, Camera) {
                 &look_from,
                 &look_at,
                 &Vector3::new(0.0, 1.0, 0.0),
-                20.0,
-                nx as f32 / ny as f32,
-                aperture,
-                focus_dist,
+                &ViewInfo::new(20.0, nx as f32 / ny as f32, aperture, focus_dist),
                 0.0,
                 1.0,
             )
@@ -183,10 +178,12 @@ pub fn earth() -> (Vec<Box<dyn Hittable>>, Camera) {
             &Vector3::new(0.0, 0.0, 10.0),
             &Vector3::zero(),
             &Vector3::up(),
-            2.0 * f32::atan(1.2 / 10.0) * 180.0 / f32::consts::PI,
-            1200.0 / 800.0,
-            0.0,
-            10.0,
+            &ViewInfo::new(
+                2.0 * f32::atan(1.2 / 10.0) * 180.0 / f32::consts::PI,
+                1200.0 / 800.0,
+                0.0,
+                10.0,
+            ),
             0.0,
             0.0,
         ),
@@ -204,10 +201,12 @@ pub fn earth_other_half() -> (Vec<Box<dyn Hittable>>, Camera) {
             &Vector3::new(0.0, 0.0, -10.0),
             &Vector3::zero(),
             &Vector3::up(),
-            2.0 * f32::atan(1.2 / 10.0) * 180.0 / f32::consts::PI,
-            1200.0 / 800.0,
-            0.0,
-            10.0,
+            &ViewInfo::new(
+                2.0 * f32::atan(1.2 / 10.0) * 180.0 / f32::consts::PI,
+                1200.0 / 800.0,
+                0.0,
+                10.0,
+            ),
             0.0,
             0.0,
         ),
@@ -219,28 +218,29 @@ pub fn simple_light(nx: i32, ny: i32) -> (Vec<Box<dyn Hittable>>, Camera) {
         {
             let noise = Arc::new(Lambertian::new(NoiseTexture::new(4.0)));
             let light = Arc::new(DiffuseLight::new(ConstantTexture::new(4.0, 4.0, 4.0)));
-            let mut obj_list: Vec<Box<dyn Hittable>> = Vec::with_capacity(4);
-            obj_list.push(Box::new(Sphere::new::<Lambertian, Arc<Lambertian>>(
-                &Vector3::new(0.0, -1000.0, 0.0),
-                1000.0,
-                noise.clone(),
-            )));
-            obj_list.push(Box::new(Sphere::new::<Lambertian, Arc<Lambertian>>(
-                &Vector3::new(0.0, 2.0, 0.0),
-                2.0,
-                noise.clone(),
-            )));
-            obj_list.push(Box::new(Sphere::new::<DiffuseLight, Arc<DiffuseLight>>(
-                &Vector3::new(0.0, 7.0, 0.0),
-                2.0,
-                light.clone(),
-            )));
-            obj_list.push(Box::new(XyRect::new::<DiffuseLight, Arc<DiffuseLight>>(
-                (3.0, 5.0),
-                (1.0, 3.0),
-                -2.0,
-                light.clone() as Arc<DiffuseLight>,
-            )));
+            let obj_list: Vec<Box<dyn Hittable>> = vec![
+                Box::new(Sphere::new::<Lambertian, Arc<Lambertian>>(
+                    &Vector3::new(0.0, -1000.0, 0.0),
+                    1000.0,
+                    noise.clone(),
+                )),
+                Box::new(Sphere::new::<Lambertian, Arc<Lambertian>>(
+                    &Vector3::new(0.0, 2.0, 0.0),
+                    2.0,
+                    noise,
+                )),
+                Box::new(Sphere::new::<DiffuseLight, Arc<DiffuseLight>>(
+                    &Vector3::new(0.0, 7.0, 0.0),
+                    2.0,
+                    light.clone(),
+                )),
+                Box::new(XyRect::new::<DiffuseLight, Arc<DiffuseLight>>(
+                    (3.0, 5.0),
+                    (1.0, 3.0),
+                    -2.0,
+                    light,
+                )),
+            ];
             obj_list
         },
         {
@@ -251,10 +251,12 @@ pub fn simple_light(nx: i32, ny: i32) -> (Vec<Box<dyn Hittable>>, Camera) {
                 &look_from,
                 &look_at,
                 &Vector3::up(),
-                2.0 * 180.0 / f32::consts::PI * f32::atan(5.0 / distance),
-                nx as f32 / ny as f32,
-                0.0,
-                distance,
+                &ViewInfo::new(
+                    2.0 * 180.0 / f32::consts::PI * f32::atan(5.0 / distance),
+                    nx as f32 / ny as f32,
+                    0.0,
+                    distance,
+                ),
                 0.0,
                 0.0,
             )
@@ -270,49 +272,43 @@ pub fn cornell_box(nx: i32, ny: i32) -> (Vec<Box<dyn Hittable>>, Camera) {
             let green_material = Lambertian::new(ConstantTexture::new(0.12, 0.45, 0.15));
             let light_material = DiffuseLight::new(ConstantTexture::new(15.0, 15.0, 15.0));
 
-            let mut list: Vec<Box<dyn Hittable>> = Vec::with_capacity(5);
-            list.push(Box::new(FlipNormals::new(YzRect::new(
-                (0.0, 555.0),
-                (0.0, 555.0),
-                555.0,
-                green_material,
-            ))));
-            list.push(Box::new(YzRect::new(
-                (0.0, 555.0),
-                (0.0, 555.0),
-                0.0,
-                red_material,
-            )));
-            list.push(Box::new(ZxRect::new(
-                (227.0, 332.0),
-                (213.0, 343.0),
-                554.0,
-                light_material,
-            )));
-            list.push(Box::new(FlipNormals::new(ZxRect::new::<
-                Lambertian,
-                Arc<Lambertian>,
-            >(
-                (0.0, 555.0),
-                (0.0, 555.0),
-                555.0,
-                white_material.clone(),
-            ))));
-            list.push(Box::new(ZxRect::new::<Lambertian, Arc<Lambertian>>(
-                (0.0, 555.0),
-                (0.0, 555.0),
-                0.0,
-                white_material.clone(),
-            )));
-            list.push(Box::new(FlipNormals::new(XyRect::new::<
-                Lambertian,
-                Arc<Lambertian>,
-            >(
-                (0.0, 555.0),
-                (0.0, 555.0),
-                555.0,
-                white_material,
-            ))));
+            let list: Vec<Box<dyn Hittable>> = vec![
+                Box::new(FlipNormals::new(YzRect::new(
+                    (0.0, 555.0),
+                    (0.0, 555.0),
+                    555.0,
+                    green_material,
+                ))),
+                Box::new(YzRect::new((0.0, 555.0), (0.0, 555.0), 0.0, red_material)),
+                Box::new(ZxRect::new(
+                    (227.0, 332.0),
+                    (213.0, 343.0),
+                    554.0,
+                    light_material,
+                )),
+                Box::new(FlipNormals::new(
+                    ZxRect::new::<Lambertian, Arc<Lambertian>>(
+                        (0.0, 555.0),
+                        (0.0, 555.0),
+                        555.0,
+                        white_material.clone(),
+                    ),
+                )),
+                Box::new(ZxRect::new::<Lambertian, Arc<Lambertian>>(
+                    (0.0, 555.0),
+                    (0.0, 555.0),
+                    0.0,
+                    white_material.clone(),
+                )),
+                Box::new(FlipNormals::new(
+                    XyRect::new::<Lambertian, Arc<Lambertian>>(
+                        (0.0, 555.0),
+                        (0.0, 555.0),
+                        555.0,
+                        white_material,
+                    ),
+                )),
+            ];
             list
         },
         {
@@ -322,10 +318,7 @@ pub fn cornell_box(nx: i32, ny: i32) -> (Vec<Box<dyn Hittable>>, Camera) {
                 &look_from,
                 &look_at,
                 &Vector3::up(),
-                40.0,
-                nx as f32 / ny as f32,
-                0.0,
-                10.0,
+                &ViewInfo::new(40.0, nx as f32 / ny as f32, 0.0, 10.0),
                 0.0,
                 1.0,
             )

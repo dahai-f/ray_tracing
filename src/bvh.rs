@@ -68,7 +68,7 @@ impl Hittable for BvhNode {
 
         match (
             self.left_child.hit(ray, t_min, t_max),
-            self.left_child.hit(ray, t_min, t_max),
+            self.right_child.hit(ray, t_min, t_max),
         ) {
             (Some(left_record), Some(right_record)) => {
                 if left_record.t <= right_record.t {

@@ -69,8 +69,7 @@ impl Texture for NoiseTexture {
         //        Vector3::new(1.0, 1.0, 1.0) * PERLIN.turbulence(&(position * self.scale), 7)
         Vector3::new(1.0, 1.0, 1.0)
             * (0.5
-                * (1.0
-                    + (self.scale * position.z() + 10.0 * PERLIN.turbulence(&position, 7)).sin()))
+                * (1.0 + (self.scale * position.z() + 10.0 * PERLIN.turbulence(position, 7)).sin()))
     }
 }
 
@@ -92,11 +91,11 @@ impl Deref for ImageTexture {
 
 impl Texture for ImageTexture {
     fn value(&self, u: f32, v: f32, _: &Vector3) -> Vector3 {
-        let (w, h) = self.0.dimensions();
-        let x = (u * w as f32) as i32;
-        let y = ((1.0 - v) * h as f32 - 0.001) as i32;
-        let x = (x.max(0) as u32).min(w - 1);
-        let y = (y.max(0) as u32).min(h - 1);
+        let (width, height) = self.0.dimensions();
+        let x = (u * width as f32) as i32;
+        let y = ((1.0 - v) * height as f32 - 0.001) as i32;
+        let x = (x.max(0) as u32).min(width - 1);
+        let y = (y.max(0) as u32).min(height - 1);
         let pixel = self.get_pixel(x, y);
         Vector3::new(
             pixel[0] as f32 / 255.0,

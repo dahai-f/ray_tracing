@@ -37,21 +37,21 @@ unsafe impl Sync for Sphere {}
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let co = ray.origin() - self.center; // center to origin
-        let a = ray.direction().dot(ray.direction());
-        let b = 2.0 * ray.direction().dot(&co);
-        let c = co.dot(&co) - self.radius * self.radius;
-        let discriminant = b * b - 4.0 * a * c;
+        let a_of_equation = ray.direction().dot(ray.direction());
+        let b_of_equation = 2.0 * ray.direction().dot(&co);
+        let c_of_equation = co.dot(&co) - self.radius * self.radius;
+        let discriminant = b_of_equation * b_of_equation - 4.0 * a_of_equation * c_of_equation;
 
         let t = {
             || -> Option<f32> {
                 if discriminant < 0.0 {
                     return None;
                 }
-                let t = (-b - discriminant.sqrt()) / (2.0 * a);
+                let t = (-b_of_equation - discriminant.sqrt()) / (2.0 * a_of_equation);
                 if t > t_min && t < t_max {
                     return Some(t);
                 }
-                let t = (-b + discriminant.sqrt()) / (2.0 * a);
+                let t = (-b_of_equation + discriminant.sqrt()) / (2.0 * a_of_equation);
                 if t > t_min && t < t_max {
                     return Some(t);
                 }

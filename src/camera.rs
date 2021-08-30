@@ -1,5 +1,24 @@
-use crate::*;
 use std::f32;
+
+use crate::*;
+
+pub struct ViewInfo {
+    fov: f32,
+    aspect: f32,
+    aperture: f32,
+    focus_dist: f32,
+}
+
+impl ViewInfo {
+    pub fn new(fov: f32, aspect: f32, aperture: f32, focus_dist: f32) -> Self {
+        Self {
+            fov,
+            aspect,
+            aperture,
+            focus_dist,
+        }
+    }
+}
 
 pub struct Camera {
     origin: Vector3,
@@ -19,16 +38,13 @@ impl Camera {
         look_from: &Vector3,
         look_at: &Vector3,
         view_up: &Vector3,
-        vfov: f32,
-        aspect: f32,
-        aperture: f32,
-        focus_dist: f32,
+        view_info: &ViewInfo,
         t0: f32,
         t1: f32,
     ) -> Camera {
-        let theta = vfov * (f32::consts::PI / 180.0);
-        let half_height = (theta / 2.0).tan() * focus_dist;
-        let half_width = aspect * half_height;
+        let theta = view_info.fov * (f32::consts::PI / 180.0);
+        let half_height = (theta / 2.0).tan() * view_info.focus_dist;
+        let half_width = view_info.aspect * half_height;
 
         let w = (look_from - look_at).normalized();
         let u = view_up.cross(&w);
@@ -36,13 +52,16 @@ impl Camera {
 
         Camera {
             origin: *look_from,
-            lower_left_corner: look_from - &w * focus_dist - &u * half_width - &v * half_height,
-            horizontal: 2.0 * half_width * &u,
-            vertical: 2.0 * half_height * &v,
+            lower_left_corner: look_from
+                - w * view_info.focus_dist
+                - u * half_width
+                - v * half_height,
+            horizontal: 2.0 * half_width * u,
+            vertical: 2.0 * half_height * v,
             u,
             v,
             _w: w,
-            lens_radius: aperture / 2.0,
+            lens_radius: view_info.aperture / 2.0,
             time0: t0,
             time1: t1,
         }
@@ -54,7 +73,7 @@ impl Camera {
         let time = self.time0 + (self.time1 - self.time0) * Random::gen::<f32>();
         Ray::new(
             &origin,
-            &(self.lower_left_corner + &self.horizontal * u + &self.vertical * v - &origin)
+            &(self.lower_left_corner + self.horizontal * u + self.vertical * v - origin)
                 .normalized(),
             time,
         )

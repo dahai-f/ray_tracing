@@ -82,7 +82,7 @@ impl Vector3 {
     }
 
     pub fn distance(&self, other: &Vector3) -> f32 {
-        (self - other).length()
+        (*self - *other).length()
     }
 
     pub fn normalize(&mut self) {
@@ -108,14 +108,14 @@ impl Vector3 {
     }
 
     pub fn reflect(&self, normal: &Vector3) -> Vector3 {
-        self - &(normal * (self.dot(normal) * 2.0))
+        self - (normal * (self.dot(normal) * 2.0))
     }
 
     pub fn refract(&self, normal: &Vector3, ni_over_nt: f32) -> Option<Vector3> {
         let dt = self.dot(normal);
         let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
         if discriminant > 0.0 {
-            Some(&(ni_over_nt * &(self - &(dt * normal))) - &(discriminant.sqrt() * normal))
+            Some((ni_over_nt * (self - dt * normal)) - discriminant.sqrt() * normal)
         } else {
             None
         }
@@ -144,7 +144,7 @@ impl Add for Vector3 {
     type Output = Vector3;
 
     fn add(self, rhs: Vector3) -> Vector3 {
-        &self + &rhs
+        Vector3::new(self.x() + rhs.x(), self.y() + rhs.y(), self.z() + rhs.z())
     }
 }
 
@@ -168,23 +168,29 @@ impl Sub<Vector3> for &Vector3 {
     type Output = Vector3;
 
     fn sub(self, rhs: Vector3) -> Vector3 {
-        self - &rhs
+        Vector3::new(self.x() - rhs.x(), self.y() - rhs.y(), self.z() - rhs.z())
     }
 }
 
 impl Sub for Vector3 {
     type Output = Vector3;
 
-    fn sub(self, rhs: Vector3) -> Vector3 {
-        &self - &rhs
+    fn sub(mut self, rhs: Vector3) -> Vector3 {
+        self.0[0] -= rhs.0[0];
+        self.0[1] -= rhs.0[1];
+        self.0[2] -= rhs.0[2];
+        self
     }
 }
 
 impl Sub<&Vector3> for Vector3 {
     type Output = Vector3;
 
-    fn sub(self, rhs: &Vector3) -> Vector3 {
-        &self - rhs
+    fn sub(mut self, rhs: &Vector3) -> Vector3 {
+        self.0[0] -= rhs.0[0];
+        self.0[1] -= rhs.0[1];
+        self.0[2] -= rhs.0[2];
+        self
     }
 }
 
@@ -231,8 +237,11 @@ impl Mul<f32> for &Vector3 {
 impl Mul<f32> for Vector3 {
     type Output = Vector3;
 
-    fn mul(self, rhs: f32) -> Vector3 {
-        &self * rhs
+    fn mul(mut self, rhs: f32) -> Vector3 {
+        self.0[0] *= rhs;
+        self.0[1] *= rhs;
+        self.0[2] *= rhs;
+        self
     }
 }
 
@@ -315,9 +324,8 @@ impl Display for Vector3 {
 impl Distribution<Vector3> for Standard {
     fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Vector3 {
         loop {
-            let result = &(2.0
-                * &Vector3::new(rng.gen::<f32>(), rng.gen::<f32>(), rng.gen::<f32>()))
-                - &Vector3::new(1.0, 1.0, 1.0);
+            let result = 2.0 * Vector3::new(rng.gen::<f32>(), rng.gen::<f32>(), rng.gen::<f32>())
+                - Vector3::new(1.0, 1.0, 1.0);
             if result.squared_length() < 1.0 {
                 return result;
             }

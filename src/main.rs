@@ -2,7 +2,6 @@ extern crate rand;
 extern crate ray_tracing;
 extern crate thread_pool;
 
-use std::f32;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::time;
