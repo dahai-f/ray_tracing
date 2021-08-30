@@ -16,16 +16,19 @@ fn main() {
     println!("P3\n{} {}\n255", nx, ny);
 
     let start_time = time::Instant::now();
-    let (mut world, camera) = scenes::cornell_box(1200, 800);
-    let camera = &camera;
+    let (mut world, camera) = scenes::random(1200, 800);
+    let camera = Arc::new(camera);
 
     let mut thread_pool = thread_pool::ThreadPool::new(12);
     let (color_sender, color_receiver) = mpsc::channel();
     let bvh_root = BvhNode::from_hit_list(&mut world);
+    let bvh_root = Arc::new(bvh_root);
     for j in (0..ny).rev() {
         for i in 0..nx {
             for _ in 0..ns {
                 let color_sender = color_sender.clone();
+                let camera = camera.clone();
+                let bvh_root = bvh_root.clone();
                 thread_pool.execute(move || {
                     let u = (i as f32 + Random::gen::<f32>()) / nx as f32;
                     let v = (j as f32 + Random::gen::<f32>()) / ny as f32;
@@ -66,8 +69,8 @@ fn render(r: &Ray, bvh_root: &BvhNode, depth: u32) -> Vector3 {
         }
         emitted
     } else {
-        Vector3::zero()
-        //        let t = 0.5 * (r.direction().y() + 1.0);
-        //        &((1.0 - t) * &Vector3::new(1.0, 1.0, 1.0)) + &(t * &Vector3::new(0.5, 0.7, 1.0))
+        // Vector3::zero()
+        let t = 0.5 * (r.direction().y() + 1.0);
+        (1.0 - t) * Vector3::new(1.0, 1.0, 1.0) + t * Vector3::new(0.5, 0.7, 1.0)
     }
 }
