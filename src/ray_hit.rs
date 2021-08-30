@@ -17,7 +17,7 @@ pub trait Hittable: Sync + Send {
     fn bounding_box(&self) -> Option<AABB>;
 }
 
-impl Hittable for &[Box<dyn Hittable>] {
+impl Hittable for &[Arc<dyn Hittable>] {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let mut result = None;
         let mut closest_so_far = t_max;
