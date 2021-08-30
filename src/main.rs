@@ -8,6 +8,7 @@ use std::time;
 
 use ray_tracing::bvh::BvhNode;
 use ray_tracing::*;
+use std::time::Instant;
 
 fn main() {
     let nx = 1200;
@@ -15,7 +16,7 @@ fn main() {
     let ns = 10;
     println!("P3\n{} {}\n255", nx, ny);
 
-    let start_time = time::Instant::now();
+    let start_time = Instant::now();
     let (mut world, camera) = scenes::random(1200, 800);
     let camera = Arc::new(camera);
 
@@ -23,6 +24,13 @@ fn main() {
     let (color_sender, color_receiver) = mpsc::channel();
     let bvh_root = BvhNode::from_hit_list(&mut world);
     let bvh_root = Arc::new(bvh_root);
+
+    let after_bvh_building = Instant::now();
+    eprintln!(
+        "bvh cost: {}s",
+        (after_bvh_building - start_time).as_secs_f64()
+    );
+
     for j in (0..ny).rev() {
         for i in 0..nx {
             for _ in 0..ns {
@@ -51,7 +59,11 @@ fn main() {
 
     let after_ray_tracing = time::Instant::now();
     eprintln!(
-        "ray tracing duration: {}s",
+        "ray tracing cost: {}s",
+        (after_ray_tracing - after_bvh_building).as_secs_f64()
+    );
+    eprintln!(
+        "total cost: {}s",
         (after_ray_tracing - start_time).as_secs_f64()
     );
 }
